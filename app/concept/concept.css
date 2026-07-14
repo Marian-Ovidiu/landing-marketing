@@ -1,0 +1,701 @@
+/* Concept C «Dal rumore al piano» — stati statici della hero.
+   Geometrie tarate sui viewport di riferimento: desktop 1440x1000, mobile 390x844. */
+
+/* ---------- Canvas ---------- */
+.stage {
+  position: relative;
+  margin: 0 auto;
+  overflow: hidden;
+  background: var(--surface-canvas);
+}
+.stage--desktop {
+  width: 1440px;
+  min-height: 1000px;
+}
+.stage--mobile {
+  width: 390px;
+  min-height: 1290px;
+}
+.stage--mobile.stage--final {
+  min-height: 990px;
+}
+
+.hero-texture {
+  position: absolute;
+  inset: 0;
+  background: url("/assets/hero-surface-texture-v2-1024.webp") center / cover no-repeat;
+  z-index: 0;
+}
+
+.grain-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* ---------- Navigation ---------- */
+.nav {
+  position: relative;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+  padding: 0 var(--hero-padding-x-desktop);
+}
+.stage--mobile .nav {
+  height: 56px;
+  padding: 0 var(--hero-padding-x-mobile);
+}
+.nav-wordmark {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.nav-links {
+  display: flex;
+  gap: var(--space-xl);
+}
+.nav-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* ---------- Copy ---------- */
+.hero-copy {
+  position: relative;
+  z-index: 30;
+  padding-left: var(--hero-padding-x-desktop);
+  padding-top: 74px;
+}
+.stage--mobile .hero-copy {
+  padding-left: var(--hero-padding-x-mobile);
+  padding-right: var(--hero-padding-x-mobile);
+  padding-top: var(--space-md);
+}
+
+.headline {
+  font-family: var(--font-display), "Iowan Old Style", Georgia, serif;
+  font-weight: 580;
+  font-size: 80px; /* token: clamp(44px, 6.6vw, 96px); ridotto a 80 per la zona a densità zero (nota in browser-design.json) */
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  font-variation-settings: "opsz" 144, "SOFT" 40;
+}
+.stage--mobile .headline {
+  font-size: 40px;
+  line-height: 1.06;
+  letter-spacing: -0.01em;
+  max-width: 350px;
+}
+
+.lead {
+  margin-top: var(--space-xl);
+  font-size: 20px;
+  line-height: 1.5;
+  max-width: 46ch;
+  width: 480px;
+}
+.stage--mobile .lead {
+  margin-top: var(--space-lg);
+  font-size: 17px;
+  width: auto;
+  max-width: 350px;
+}
+
+/* ---------- CTA ---------- */
+.cta-row {
+  margin-top: var(--space-xl);
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+.cta-primary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 16px 28px;
+  background: var(--accent-terracotta-deep);
+  color: var(--text-on-accent);
+  border-radius: var(--radius-pill);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  line-height: 1;
+  text-decoration: none;
+  box-shadow: var(--shadow-cta-resting);
+  filter: saturate(0.92); /* storyboard scene-04: 92% → 100% */
+  transition: filter 180ms ease, box-shadow 180ms ease;
+}
+.cta-row--emphasized .cta-primary {
+  filter: none;
+  box-shadow: var(--shadow-cta-emphasis);
+}
+.cta-secondary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  gap: var(--space-xs);
+  color: var(--text-primary);
+  font-size: 17px;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(var(--ink-rgb), 0.45);
+  text-underline-offset: 5px;
+}
+.nav-links a:focus-visible,
+.cta-primary:focus-visible,
+.cta-secondary:focus-visible {
+  outline: 2px dashed var(--surface-ink);
+  outline-offset: 3px;
+}
+.cta-arrow {
+  display: inline-block; /* esclude la freccia dall'underline */
+  transform: translateY(-1px);
+}
+.stage--mobile .cta-row {
+  position: absolute;
+  left: var(--hero-padding-x-mobile);
+  right: var(--hero-padding-x-mobile);
+  z-index: 30;
+  margin-top: 0;
+  flex-direction: column;
+  gap: var(--space-md);
+  align-items: center;
+}
+.stage--mobile.stage--initial .cta-row {
+  top: 1150px;
+}
+.stage--mobile.stage--final .cta-row {
+  top: 864px;
+}
+.stage--mobile .cta-primary {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ---------- Campo dei frammenti ---------- */
+.slot {
+  position: absolute;
+  z-index: 10;
+}
+.fragment {
+  filter: drop-shadow(0 1px 2px rgba(var(--ink-rgb), 0.1))
+    drop-shadow(0 10px 28px rgba(var(--ink-rgb), 0.1));
+}
+
+/* Desktop: densi in basso a sinistra e sul bordo destro, diagonali verso il pannello */
+.stage--desktop .slot--review {
+  left: 1120px;
+  top: 82px;
+  width: 230px;
+  transform: rotate(-2deg);
+}
+.stage--desktop .slot--polaroid {
+  left: 1040px;
+  top: 238px;
+  width: 220px;
+  transform: rotate(4deg);
+}
+.stage--desktop .slot--social {
+  left: 600px;
+  top: 428px;
+  width: 230px;
+  transform: rotate(-2.5deg);
+}
+.stage--desktop .slot--receipt {
+  left: 130px;
+  top: 645px;
+  width: 185px;
+  transform: rotate(-5deg);
+}
+.stage--desktop .slot--note {
+  left: 360px;
+  top: 698px;
+  width: 250px;
+  transform: rotate(3deg);
+}
+.stage--desktop .slot--flyer {
+  left: 632px;
+  top: 640px;
+  width: 190px;
+  transform: rotate(-3deg);
+}
+
+/* Mobile: solo scontrino, recensione, volantino a zig-zag */
+.stage--mobile .slot--receipt {
+  left: 22px;
+  top: 370px;
+  width: 158px;
+  transform: rotate(-4deg);
+}
+.stage--mobile .slot--review {
+  left: 190px;
+  top: 470px;
+  width: 180px;
+  transform: rotate(2deg);
+}
+.stage--mobile .slot--flyer {
+  left: 46px;
+  top: 640px;
+  width: 160px;
+  transform: rotate(-2deg);
+}
+.stage--mobile .receipt-paper {
+  padding: 16px 12px 24px;
+}
+.stage--mobile .receipt-line,
+.stage--mobile .receipt-row,
+.stage--mobile .receipt-sep {
+  font-size: 11px;
+}
+.stage--mobile .flyer-paper {
+  padding: 56px 14px 0;
+}
+.stage--mobile .flyer-sub {
+  font-size: 12px;
+  margin-top: var(--space-xs);
+}
+
+/* Stato finale desktop: residui assorbiti dietro il vetro */
+/* Residui assorbiti: sotto il vetro (z 15 < 20), il fill trasparente e il
+   backdrop blur del pannello li rendono sagome riconoscibili ma smorzate. */
+.slot--absorbed {
+  z-index: 15;
+  filter: blur(3px);
+  opacity: 0.55;
+}
+.slot--absorbed-receipt {
+  /* parte dello scontrino spunta dal bordo sinistro del pannello */
+  left: 726px;
+  top: 556px;
+  width: 150px;
+  transform: rotate(-7deg);
+}
+.slot--absorbed-flyer {
+  /* l'angolo spunta oltre il bordo destro del pannello */
+  left: 1162px;
+  top: 690px;
+  width: 170px;
+  transform: rotate(8deg);
+}
+.slot--absorbed-polaroid {
+  /* massa tonale che affiora dal bordo inferiore */
+  left: 952px;
+  top: 716px;
+  width: 190px;
+  transform: rotate(-3deg);
+}
+
+/* ---------- Scontrino ---------- */
+.receipt-paper {
+  background: var(--surface-paper-thermal);
+  border-radius: var(--radius-paper);
+  padding: 20px 16px 30px;
+  clip-path: polygon(
+    0 0, 100% 0, 100% calc(100% - 9px), 95% 100%, 90% calc(100% - 6px),
+    85% 100%, 80% calc(100% - 8px), 75% 100%, 70% calc(100% - 5px),
+    65% 100%, 60% calc(100% - 8px), 55% 100%, 50% calc(100% - 6px),
+    45% 100%, 40% calc(100% - 9px), 35% 100%, 30% calc(100% - 6px),
+    25% 100%, 20% calc(100% - 8px), 15% 100%, 10% calc(100% - 5px),
+    5% 100%, 0 calc(100% - 8px)
+  );
+}
+.receipt-line,
+.receipt-row,
+.receipt-sep {
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-xs);
+}
+.receipt-row--total {
+  font-weight: 500;
+}
+.receipt-sep {
+  color: var(--text-secondary);
+  overflow: hidden;
+  white-space: nowrap;
+}
+.receipt-line--head {
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 6px;
+}
+.receipt-line--foot {
+  text-align: center;
+  margin-top: 8px;
+  color: var(--text-secondary);
+}
+
+/* ---------- Recensione ---------- */
+.review-paper {
+  background: var(--surface-paper);
+  border-radius: var(--radius-paper);
+  padding: 18px;
+  display: grid;
+  gap: 10px;
+}
+.review-stars {
+  display: flex;
+  gap: var(--space-2xs);
+  color: var(--accent-brass);
+}
+.review-quote {
+  font-size: 14px;
+  line-height: 1.45;
+}
+.review-author {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* ---------- Volantino ---------- */
+.flyer-paper {
+  position: relative;
+  background: var(--surface-paper);
+  border-radius: var(--radius-paper);
+  aspect-ratio: 1 / 1.4;
+  overflow: hidden;
+  padding: 72px 18px 0;
+}
+.flyer-paper::before {
+  /* patinatura: sheen diagonale tenue */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0) 42%,
+    rgba(255, 255, 255, 0.16) 50%,
+    rgba(255, 255, 255, 0) 58%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+.flyer-circle {
+  position: absolute;
+  top: -34px;
+  right: -28px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: var(--accent-olive);
+}
+.flyer-title {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  font-size: 25px;
+  line-height: 1.1;
+}
+.stage--mobile .flyer-title {
+  font-size: 20px;
+}
+.flyer-sub {
+  margin-top: var(--space-sm);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.flyer-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--accent-terracotta);
+  color: var(--text-on-accent);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 10px 18px 12px;
+}
+
+/* ---------- Post social ---------- */
+.social-paper {
+  background: var(--surface-paper);
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+  /* ritaglio a forbice: quadrilatero leggermente storto, niente radius */
+  clip-path: polygon(1.2% 1%, 99.2% 0%, 100% 98.6%, 0.8% 100%);
+}
+.social-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.social-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--surface-canvas-deep);
+}
+.social-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+.social-photo {
+  display: block;
+  height: 84px;
+  border-radius: 4px;
+  background: var(--surface-canvas-deep);
+}
+.social-text {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* ---------- Appunti ---------- */
+.note-paper {
+  background: var(--surface-paper);
+  padding: 22px 16px 18px;
+  clip-path: polygon(
+    0 10px, 7% 3px, 15% 9px, 24% 2px, 33% 8px, 42% 3px, 51% 9px,
+    60% 2px, 69% 7px, 78% 3px, 87% 9px, 95% 4px, 100% 8px,
+    100% 100%, 0 100%
+  );
+}
+.note-line {
+  font-family: var(--font-hand), cursive;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--surface-ink);
+}
+.note-line--circled {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+}
+.note-ellipse {
+  position: absolute;
+  inset: -5px -8px;
+  width: calc(100% + 16px);
+  height: calc(100% + 10px);
+  color: var(--accent-terracotta-deep);
+  pointer-events: none;
+}
+
+/* ---------- Polaroid (ibrido: cornice DOM + foto generata) ---------- */
+.polaroid-frame {
+  position: relative;
+  background: var(--surface-paper);
+  padding: 12px 12px 44px;
+  border-radius: 2px;
+}
+.polaroid-frame::before {
+  /* grana solo sulla cornice cartacea, sotto la foto */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("/assets/hero-paper-grain-512.webp") repeat;
+  background-size: 512px 512px;
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+  pointer-events: none;
+}
+.polaroid-window {
+  position: relative;
+  overflow: hidden; /* maschera: l'effetto ambientale non esce mai dalla foto */
+}
+.polaroid-photo {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* layer ambientali: inerti (opacity 0) ovunque tranne che in /concept/live */
+.polaroid-light,
+.polaroid-glint {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.polaroid-light {
+  inset: -30%;
+  background: linear-gradient(
+    125deg,
+    rgba(255, 214, 165, 0) 30%,
+    rgba(255, 214, 165, 0.55) 47%,
+    rgba(255, 236, 210, 0.35) 53%,
+    rgba(255, 214, 165, 0) 68%
+  );
+}
+.polaroid-glint {
+  inset: 0;
+  background:
+    radial-gradient(20% 15% at 42% 22%, rgba(255, 244, 214, 0.9), transparent 70%),
+    radial-gradient(18% 13% at 53% 50%, rgba(255, 244, 214, 0.8), transparent 70%);
+}
+
+/* ---------- Glass panel ---------- */
+/* Vetro fumé reale: fill trasparente, backdrop che sfoca e scurisce ciò che
+   attraversa, bordo superiore luminoso, highlight e ombra interni, riflesso
+   diagonale tenue. Niente glow. */
+.glass-panel {
+  position: absolute;
+  z-index: 20;
+  background: var(--glass-smoke-fill);
+  border: 1px solid var(--glass-smoke-stroke);
+  border-radius: var(--radius-glass-panel);
+  box-shadow:
+    0 2px 4px rgba(var(--ink-rgb), 0.12),
+    0 24px 56px rgba(var(--ink-rgb), 0.18),
+    inset 0 1px 0 rgba(251, 247, 238, 0.42),
+    inset 0 26px 48px -26px rgba(251, 247, 238, 0.14),
+    inset 0 -30px 46px -30px rgba(var(--ink-rgb), 0.3);
+  backdrop-filter: blur(var(--blur-glass-backdrop)) brightness(0.93) saturate(0.95);
+  -webkit-backdrop-filter: blur(var(--blur-glass-backdrop)) brightness(0.93) saturate(0.95);
+}
+.glass-panel::before {
+  /* riflesso diagonale molto tenue */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    115deg,
+    rgba(251, 247, 238, 0) 32%,
+    rgba(251, 247, 238, 0.06) 46%,
+    rgba(251, 247, 238, 0) 60%
+  );
+  pointer-events: none;
+}
+.stage--desktop.stage--initial .glass-panel {
+  left: 870px;
+  width: 420px;
+  top: 520px;
+  height: 440px;
+  background: rgba(var(--ink-rgb), 0.12); /* secondo piano tonale (scene-01) */
+}
+.stage--desktop.stage--final .glass-panel {
+  /* payoff della trasformazione: più grande, più alto, più vicino al centro */
+  left: 790px;
+  width: 480px;
+  top: 410px;
+  height: 500px;
+  background: rgba(var(--ink-rgb), 0.26);
+  border-color: var(--glass-smoke-highlight); /* stroke acceso (scene-03) */
+}
+.stage--mobile .glass-panel {
+  left: 12px;
+  width: 366px;
+}
+.stage--mobile.stage--initial .glass-panel {
+  top: 880px;
+  height: 190px;
+  background: rgba(var(--ink-rgb), 0.1);
+}
+.stage--mobile.stage--final .glass-panel {
+  top: 370px;
+  height: 470px;
+  background: rgba(var(--ink-rgb), 0.26);
+  border-color: var(--glass-smoke-highlight);
+}
+.glass-panel-inner {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+}
+.stage--desktop .glass-panel-inner {
+  padding: 28px;
+}
+/* etichetta discreta del pannello vuoto (mobile initial) */
+.plan-hint {
+  margin: auto;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-on-glass);
+  opacity: 0.55;
+}
+
+/* ---------- Pila del piano ---------- */
+.plan-caption {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-on-glass);
+  opacity: 0.85;
+  margin-bottom: var(--space-md);
+}
+.plan-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.plan-card {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  background: var(--surface-paper);
+  border-radius: var(--radius-plan-card);
+  box-shadow: var(--shadow-plan-stack);
+  padding: 16px 20px 18px;
+}
+.plan-card--priority {
+  border-top: 3px solid var(--accent-terracotta);
+}
+/* pila sfalsata, non meccanica */
+.plan-list li:nth-child(1) {
+  transform: rotate(-0.8deg);
+}
+.plan-list li:nth-child(2) {
+  transform: rotate(0.4deg) translateX(4px);
+}
+.plan-list li:nth-child(3) {
+  transform: rotate(-0.3deg) translateX(-3px);
+}
+.plan-card-number {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 640;
+  font-size: 34px;
+  line-height: 1.05;
+  font-variation-settings: "opsz" 72;
+}
+.plan-card-title {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 540;
+  font-size: 19px;
+  line-height: 1.25;
+}
+.plan-card-detail {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+.stage--mobile .plan-card-number {
+  font-size: 30px;
+}
+.stage--mobile .plan-card-title {
+  font-size: 18px;
+}
+.stage--mobile .plan-card-detail {
+  font-size: 12px;
+}

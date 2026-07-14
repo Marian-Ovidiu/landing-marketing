@@ -1,0 +1,59 @@
+.create-strategy-page {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 32px 20px;
+  background-color: var(--surface-canvas);
+  background-image: url("/assets/hero-surface-texture-v2-1024.webp");
+  background-size: 1024px 1024px;
+}
+
+.create-strategy-sheet {
+  width: min(680px, 100%);
+  padding: clamp(32px, 6vw, 64px);
+  border: 1px solid rgba(var(--ink-rgb), 0.16);
+  background: var(--surface-paper) url("/assets/hero-paper-grain-512.webp") repeat;
+  background-size: 512px 512px;
+  box-shadow: var(--shadow-fragment-resting);
+}
+
+.create-strategy-kicker {
+  color: var(--accent-terracotta-deep);
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.create-strategy-sheet h1 {
+  margin-top: 14px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(40px, 7vw, 64px);
+  font-weight: 570;
+  letter-spacing: -0.018em;
+  line-height: 1.02;
+}
+
+.create-strategy-sheet > p:not(.create-strategy-kicker) {
+  margin-top: 22px;
+  color: var(--text-secondary);
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+.create-strategy-sheet a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 34px;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  text-underline-offset: 5px;
+}
+
+.create-strategy-sheet a:focus-visible {
+  outline: 2px dashed var(--accent-terracotta-deep);
+  outline-offset: 4px;
+}

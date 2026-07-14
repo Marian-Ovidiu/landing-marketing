@@ -1,0 +1,670 @@
+/* Direzione B «Segnale» — tema hero (fase B1 + polish B2).
+   Tutto scoped sotto [data-theme="segnale"]: la Direzione A non è toccata.
+   Token: outputs/apple-design-tokens.json §cssVariableOverrides.
+   Materia del tema: bianco, hairline, ombre fredde e basse. Niente texture,
+   grana, vetro fumé o backdrop-filter. Il teal compare solo su dato critico,
+   stato, opportunità, priorità e CTA-filetto (budget <5%).
+
+   Sistema B2 (motivazioni in outputs/segnale-premium-polish-report.md):
+   - profondità del bianco su tre piani quasi invisibili:
+     canvas #F9FAFB < fondo pannello di sintesi #FCFDFD < materiale #FFFFFF;
+   - ombre ottiche: grandi, morbide, alpha 0.02-0.09, mai "material";
+   - hairline unificate: 1px rgba(ink, 0.08); marcatori rgba(ink, 0.16);
+     filetti teal sempre 2px;
+   - micro-tipografia: etichette mono uppercase sempre 0.08em; i dati tabellari
+     (orari) restano a 0.04em per non sgranare le colonne;
+   - gerarchia: «Dati del locale» è il punto focale secondario (più grande,
+     più aria, ombra più presente); gli altri pannelli sono più leggeri. */
+
+/* ---------- token override ---------- */
+[data-theme="segnale"] {
+  --ink-rgb: 26, 29, 32;
+
+  /* profondità del bianco: il canvas arretra di un soffio, i pannelli
+     bianchi guadagnano un piano su cui appoggiarsi */
+  --surface-canvas: #f9fafb;
+  --surface-canvas-deep: #f4f6f7;
+  --surface-paper: #ffffff;
+  --surface-paper-thermal: #f9fafb;
+  --surface-ink: #1a1d20;
+
+  --text-primary: #1a1d20;
+  --text-secondary: #5a6469;
+  --text-on-glass: #1a1d20; /* il pannello di sintesi è bianco: testo scuro */
+  --text-on-accent: #ffffff;
+
+  /* nomi storici, valori del tema (debito di naming documentato):
+     l'accento primario del tema B è il teal */
+  --accent-terracotta: #0b7a75;
+  --accent-terracotta-deep: #095f5b;
+  --accent-olive: #5a6469;
+  --accent-brass: #8a959b;
+
+  --accent-primary: #0b7a75;
+  --accent-primary-deep: #095f5b;
+  --surface-primary: #ffffff;
+  --surface-secondary: #f4f6f7;
+  --line-subtle: rgba(var(--ink-rgb), 0.08);
+  --line-hairline: rgba(var(--ink-rgb), 0.08);
+  --line-medium: rgba(var(--ink-rgb), 0.16);
+  --accent-teal-tint: #e7f2f1;
+
+  /* fondo del pannello di sintesi: mezzo passo tra canvas e materiale,
+     così i moduli bianchi appoggiano su un piano invece di fondersi */
+  --glass-smoke-fill: #fcfdfd;
+  --glass-smoke-stroke: rgba(var(--ink-rgb), 0.08);
+  --glass-smoke-highlight: rgba(11, 122, 117, 0.45);
+
+  --radius-paper: 10px;
+  --radius-plan-card: 12px;
+  --radius-glass-panel: 16px;
+
+  /* ombre ottiche: molto grandi, molto morbide, quasi inesistenti.
+     Il piano focale ha l'unica ombra "presente" tra i sei pannelli. */
+  --shadow-fragment-floating: 0 1px 2px rgba(var(--ink-rgb), 0.03),
+    0 18px 48px -10px rgba(var(--ink-rgb), 0.06);
+  --shadow-fragment-resting: 0 1px 2px rgba(var(--ink-rgb), 0.02),
+    0 14px 40px -12px rgba(var(--ink-rgb), 0.05);
+  --shadow-panel-focal: 0 1px 2px rgba(var(--ink-rgb), 0.03),
+    0 22px 56px -12px rgba(var(--ink-rgb), 0.09);
+  --shadow-glass-panel: 0 1px 2px rgba(var(--ink-rgb), 0.03),
+    0 32px 88px -16px rgba(var(--ink-rgb), 0.08);
+  --shadow-plan-stack: 0 1px 0 rgba(var(--ink-rgb), 0.05),
+    0 8px 24px rgba(var(--ink-rgb), 0.05);
+  --shadow-cta-resting: 0 1px 3px rgba(var(--ink-rgb), 0.14);
+  --shadow-cta-emphasis: 0 4px 14px rgba(var(--ink-rgb), 0.18);
+
+  --blur-glass-backdrop: 0px;
+  --blur-fragment-absorbed: 3px;
+
+  /* display del tema: Inter Tight (caricato in app/layout.tsx) */
+  --font-display: var(--font-display-b);
+}
+
+/* ---------- materia: niente texture, grana, vetro ---------- */
+[data-theme="segnale"] .stage--live {
+  background-image: none;
+}
+[data-theme="segnale"] .hero-texture {
+  display: none;
+}
+[data-theme="segnale"] .paper-grain::after {
+  display: none;
+}
+[data-theme="segnale"] .grain-overlay {
+  display: none;
+}
+[data-theme="segnale"] .glass-panel {
+  /* niente vetro: il token azzera il blur ma brightness/saturate resterebbero */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+/* ambient Polaroid: nessun nodo nel tema B; disattivazione esplicita di sicurezza */
+[data-theme="segnale"] .polaroid-photo,
+[data-theme="segnale"] .polaroid-light,
+[data-theme="segnale"] .polaroid-glint {
+  animation: none !important;
+}
+
+/* ---------- tipografia ---------- */
+[data-theme="segnale"] .headline {
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.028em;
+  font-variation-settings: normal; /* le ottiche opsz/SOFT sono di Fraunces */
+}
+/* la sottolineatura della CTA secondaria segue la disciplina hairline */
+[data-theme="segnale"] .cta-secondary {
+  text-decoration-color: rgba(var(--ink-rgb), 0.3);
+}
+
+/* ---------- pannello di sintesi (ex vetro fumé) ---------- */
+[data-theme="segnale"] .stage--live .glass-panel--live {
+  box-shadow: var(--shadow-glass-panel);
+}
+[data-theme="segnale"] .glass-panel-fill {
+  background: var(--glass-smoke-fill); /* si accende con lo scrub */
+  box-shadow: none;
+}
+/* il layer "riflesso" diventa il filetto teal superiore: stessa timeline di
+   opacità, altezza 2px, nessun glow */
+[data-theme="segnale"] .glass-panel-reflect {
+  background: none;
+  border-top: 2px solid var(--accent-primary);
+}
+/* la pila vive centrata nel pannello: senza il tono scuro del vetro,
+   il vuoto residuo in basso leggerebbe come errore di impaginazione */
+[data-theme="segnale"] .glass-panel-inner {
+  justify-content: center;
+}
+/* executive summary: più aria attorno al contenuto, meno "widget" */
+[data-theme="segnale"] .stage--live .glass-panel-inner {
+  padding: 32px;
+}
+
+/* ---------- pila del piano: moduli bianchi ---------- */
+[data-theme="segnale"] .plan-caption {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  margin-bottom: 18px;
+}
+[data-theme="segnale"] .plan-card {
+  background: var(--surface-paper);
+  border: 1px solid var(--line-hairline);
+  padding: 17px 22px 19px;
+}
+[data-theme="segnale"] .stage--live .plan-card {
+  box-shadow:
+    0 1px 0 rgba(var(--ink-rgb), calc(0.05 * var(--card-sh, 1))),
+    0 10px 28px rgba(var(--ink-rgb), calc(0.04 * var(--card-sh, 1)));
+}
+[data-theme="segnale"] .plan-list {
+  gap: 16px;
+}
+[data-theme="segnale"] .plan-card--priority {
+  border-top: 2px solid var(--accent-primary); /* filetto, non fascia */
+}
+/* pila allineata: l'ordine è la firma del tema (via gli sfalsi del tema A) */
+[data-theme="segnale"] .plan-list li:nth-child(1),
+[data-theme="segnale"] .plan-list li:nth-child(2),
+[data-theme="segnale"] .plan-list li:nth-child(3) {
+  transform: none;
+}
+[data-theme="segnale"] .plan-card-number {
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variation-settings: normal;
+  font-variant-numeric: tabular-nums;
+}
+[data-theme="segnale"] .plan-card-title {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-weight: 560;
+  font-size: 17px;
+  line-height: 1.3;
+}
+[data-theme="segnale"] .plan-card-detail {
+  margin-top: 7px;
+  line-height: 1.45;
+}
+
+/* ---------- CTA antracite (payoff: contrasto + scala ottica + ombra) ----------
+   Studio B2 (teal raffinata vs antracite): scelta l'antracite perché toglie
+   l'ultimo accento "product UI" dal campo visivo — il teal resta soltanto
+   segnale semantico nei dati e la hero diventa un sistema inchiostro/bianco.
+   L'enfasi di scena 4 usa il contrasto reale del bottone, una scala minima e
+   un'ombra più distesa; nessuna saturazione su un elemento acromatico. */
+[data-theme="segnale"] .cta-primary {
+  background: var(--surface-ink);
+}
+[data-theme="segnale"] .stage--live .cta-primary {
+  box-shadow:
+    0 1px 3px rgba(var(--ink-rgb), calc(0.14 + 0.04 * var(--cta-sh, 0))),
+    0 calc(6px * var(--cta-sh, 0)) calc(18px * var(--cta-sh, 0))
+      rgba(var(--ink-rgb), calc(0.16 * var(--cta-sh, 0)));
+}
+
+/* ---------- Signal Thread (fase B3) ----------
+   Hairline di connessione tra i pannelli: sotto gli slot (z 10) e la sintesi
+   (z 20), sopra il canvas. Il teal del segnale resta sotto il filetto pieno. */
+[data-theme="segnale"] .signal-thread {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+[data-theme="segnale"] .signal-thread path {
+  fill: none;
+  stroke-width: 1px;
+  stroke-linecap: round;
+}
+[data-theme="segnale"] .signal-thread .thread-base {
+  stroke: rgba(var(--ink-rgb), 0.13);
+}
+[data-theme="segnale"] .signal-thread .thread-signal {
+  stroke: rgba(11, 122, 117, 0.68);
+}
+
+/* ---------- Optical Aperture (fase B5) ----------
+   L'oggetto del brand: vive dentro il pannello di sintesi, sopra il fill e
+   sotto il contenuto (ordine DOM; .glass-panel-inner ha z-index 1).
+   Mascherato dal proprio clipPath: nessun overflow sul pannello.
+   Regola cromatica: ink prima del fuoco, teal solo in uscita, tinte extra
+   confinate ai quattro tick sul bordo della lente. */
+[data-theme="segnale"] .optical-aperture {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+[data-theme="segnale"] .optical-aperture .ap-ellipse {
+  fill: none;
+  stroke: rgba(var(--ink-rgb), 1);
+  stroke-width: 1.5px;
+}
+[data-theme="segnale"] .optical-aperture .ap-axis {
+  stroke: rgba(var(--ink-rgb), 1);
+  stroke-width: 1px;
+}
+[data-theme="segnale"] .optical-aperture .ap-ray {
+  fill: none;
+  stroke: rgba(var(--ink-rgb), 0.22);
+  stroke-width: 1px;
+  stroke-linejoin: round;
+}
+[data-theme="segnale"] .optical-aperture .ap-tick {
+  stroke-width: 2px;
+  stroke-linecap: round;
+}
+[data-theme="segnale"] .optical-aperture .ap-tick--aqua {
+  stroke: #bfdcda;
+}
+[data-theme="segnale"] .optical-aperture .ap-tick--cyan {
+  stroke: #bcd9e4;
+}
+[data-theme="segnale"] .optical-aperture .ap-tick--lime {
+  stroke: #cfdcb4;
+}
+[data-theme="segnale"] .optical-aperture .ap-tick--warm {
+  stroke: #e4d6c2;
+}
+[data-theme="segnale"] .optical-aperture .ap-focus {
+  fill: var(--accent-primary);
+}
+[data-theme="segnale"] .optical-aperture .ap-exit {
+  fill: none;
+  stroke: var(--accent-primary);
+  stroke-linecap: round;
+}
+
+/* ---------- pannelli informativi (panels.tsx) ---------- */
+[data-theme="segnale"] .sig-panel {
+  background: var(--surface-paper);
+  border: 1px solid var(--line-hairline);
+  border-radius: 10px;
+  box-shadow: var(--shadow-fragment-resting);
+  padding: 14px 16px 15px;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+[data-theme="segnale"] .sig-panel-label {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6d777d; /* i pannelli di contesto arretrano di mezzo tono */
+}
+
+/* punto focale secondario: «Dati del locale» (slot receipt).
+   È il pannello che contiene il segnale critico (martedì · 11 coperti):
+   più largo, più aria, etichetta piena, l'unica ombra presente. */
+[data-theme="segnale"] .stage--live .slot--receipt {
+  width: 208px;
+}
+[data-theme="segnale"] .slot--receipt .sig-panel {
+  padding: 16px 18px 17px;
+  gap: 10px;
+  box-shadow: var(--shadow-panel-focal);
+}
+[data-theme="segnale"] .slot--receipt .sig-panel-label {
+  color: var(--text-secondary);
+}
+
+/* Dati del locale */
+[data-theme="segnale"] .sig-data {
+  display: grid;
+  gap: 7px;
+}
+[data-theme="segnale"] .sig-data-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+[data-theme="segnale"] .sig-data-row dt {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+[data-theme="segnale"] .sig-data-row dd {
+  font-family: var(--font-mono), monospace;
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+[data-theme="segnale"] .sig-data-row--critical dd {
+  color: var(--accent-primary); /* dato critico */
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+/* Recensioni / Post */
+[data-theme="segnale"] .sig-review-score {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+[data-theme="segnale"] .sig-review-score strong {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  margin-right: 2px;
+}
+[data-theme="segnale"] .sig-quote {
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+[data-theme="segnale"] .sig-author {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+[data-theme="segnale"] .sig-status {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+[data-theme="segnale"] .sig-status--alert {
+  color: var(--accent-primary); /* stato che entra nel piano */
+}
+
+/* Problemi / Opportunità */
+[data-theme="segnale"] .sig-list {
+  list-style: none;
+  display: grid;
+  gap: 7px;
+}
+[data-theme="segnale"] .sig-list li {
+  position: relative;
+  padding-left: 14px;
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+[data-theme="segnale"] .sig-list li::before {
+  /* marcatore tipografico neutro (quadrato vuoto), non un'icona */
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.45em;
+  width: 5px;
+  height: 5px;
+  border: 1px solid var(--line-medium);
+}
+[data-theme="segnale"] .sig-list--teal li::before {
+  background: var(--accent-primary); /* opportunità: pieno teal */
+  border-color: var(--accent-primary);
+}
+
+/* Orari */
+[data-theme="segnale"] .sig-hours {
+  list-style: none;
+  display: grid;
+  gap: 3px;
+}
+[data-theme="segnale"] .sig-hours-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: var(--font-mono), monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.04em; /* dato tabellare, non etichetta */
+  padding: 2px 6px;
+}
+[data-theme="segnale"] .sig-hours-row strong {
+  font-weight: 500;
+}
+[data-theme="segnale"] .sig-hours-row span {
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+[data-theme="segnale"] .sig-hours-row--gap {
+  background: var(--accent-teal-tint); /* il buco del martedì */
+  border-radius: 4px;
+}
+[data-theme="segnale"] .sig-hours-row--gap strong,
+[data-theme="segnale"] .sig-hours-row--gap span {
+  color: var(--accent-primary-deep);
+  font-weight: 600;
+}
+[data-theme="segnale"] .sig-hours-note {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-primary);
+}
+
+/* ---------- mobile (390 / 360): stessa struttura approvata ---------- */
+@media (max-width: 767px) {
+  [data-theme="segnale"] .stage--live .headline {
+    letter-spacing: -0.02em;
+  }
+  [data-theme="segnale"] .stage--live .glass-panel-inner {
+    padding: 20px 18px;
+  }
+  [data-theme="segnale"] .stage--live .plan-caption {
+    font-size: 10px;
+    margin-bottom: 12px;
+  }
+  [data-theme="segnale"] .stage--live .plan-card {
+    padding: 12px 15px 14px;
+  }
+  [data-theme="segnale"] .stage--live .plan-card-number {
+    font-size: 22px;
+  }
+  [data-theme="segnale"] .stage--live .plan-card-title {
+    font-size: 15px;
+  }
+
+  /* focale: abbastanza largo da tenere l'etichetta su una riga */
+  [data-theme="segnale"] .stage--live .slot--receipt {
+    width: 132px;
+  }
+  [data-theme="segnale"] .slot--receipt .sig-panel {
+    padding: 12px 13px 13px;
+    gap: 8px;
+  }
+
+  [data-theme="segnale"] .sig-panel {
+    padding: 10px 11px 12px;
+    gap: 6px;
+    border-radius: 8px;
+  }
+  [data-theme="segnale"] .sig-data-row {
+    display: grid;
+    gap: 1px;
+  }
+  [data-theme="segnale"] .sig-data-row dd {
+    font-size: 11.5px;
+  }
+  [data-theme="segnale"] .sig-data-row--critical dd {
+    font-size: 12px;
+  }
+  [data-theme="segnale"] .sig-review-score strong {
+    font-size: 16px;
+  }
+  [data-theme="segnale"] .sig-quote {
+    font-size: 11px;
+  }
+  [data-theme="segnale"] .sig-author {
+    font-size: 10px;
+  }
+  [data-theme="segnale"] .sig-list li {
+    font-size: 11px;
+    padding-left: 12px;
+  }
+  [data-theme="segnale"] .sig-hours-row {
+    font-size: 10px;
+    padding: 1px 4px;
+  }
+  /* nello slot stretto il tracking pieno spinge la nota su tre righe */
+  [data-theme="segnale"] .sig-hours-note {
+    letter-spacing: 0.06em;
+  }
+}
+
+/* ---------- desktop intermedi (768–1439) ----------
+   Un solo canvas e la stessa composizione desktop, senza scaling globale.
+   Il canvas segue il viewport; copy, pannello e sei slot interpolano le loro
+   geometrie. Le destinazioni finali sono relative al pannello in
+   INTERMEDIATE_SEGNALE, quindi il motion approvato resta invariato. */
+@media (min-width: 768px) and (max-width: 1439px) {
+  [data-theme="segnale"] .live-canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  [data-theme="segnale"] .stage--live {
+    --hero-intermediate-padding-x: clamp(38px, 5vw, 72px);
+    --hero-intermediate-panel-left: clamp(422px, 55vw, 790px);
+    --hero-intermediate-panel-width: min(42vw, 480px);
+  }
+
+  [data-theme="segnale"] .stage--live .nav {
+    height: 64px;
+    padding-inline: var(--hero-intermediate-padding-x);
+  }
+
+  [data-theme="segnale"] .stage--live .hero-copy {
+    padding-left: var(--hero-intermediate-padding-x);
+    padding-top: 24px;
+  }
+
+  [data-theme="segnale"] .stage--live .headline {
+    font-size: clamp(52px, 6.25vw, 72px);
+    max-width: calc(100vw - 2 * var(--hero-intermediate-padding-x));
+  }
+
+  [data-theme="segnale"] .stage--live .lead {
+    margin-top: 24px;
+    width: min(480px, calc(100vw - 2 * var(--hero-intermediate-padding-x)));
+  }
+
+  [data-theme="segnale"] .stage--live .cta-row {
+    margin-top: 24px;
+    gap: 24px;
+  }
+
+  [data-theme="segnale"] .stage--live .glass-panel--live {
+    left: var(--hero-intermediate-panel-left);
+    top: 34vh;
+    width: min(
+      var(--hero-intermediate-panel-width),
+      calc(100vw - var(--hero-intermediate-panel-left) - 24px)
+    );
+    height: min(clamp(430px, 39vw, 500px), calc(100% - 34vh - 16px));
+  }
+
+  [data-theme="segnale"] .stage--live .glass-panel-inner {
+    padding: clamp(20px, 2.5vw, 32px);
+  }
+
+  [data-theme="segnale"] .stage--live .slot--receipt {
+    left: var(--hero-intermediate-padding-x);
+    top: clamp(500px, 65vh, 645px);
+    width: clamp(160px, 16vw, 208px);
+  }
+  [data-theme="segnale"] .stage--live .slot--note {
+    left: clamp(200px, 25vw, 360px);
+    top: clamp(550px, 70vh, 698px);
+    width: clamp(180px, 19vw, 250px);
+  }
+  [data-theme="segnale"] .stage--live .slot--review {
+    left: auto;
+    right: clamp(32px, 6vw, 86px);
+    top: clamp(52px, 8vh, 82px);
+    width: clamp(170px, 18vw, 230px);
+  }
+  [data-theme="segnale"] .stage--live .slot--social {
+    left: clamp(360px, 42vw, 600px);
+    top: clamp(346px, 45vh, 428px);
+    width: clamp(180px, 18vw, 230px);
+  }
+  [data-theme="segnale"] .stage--live .slot--flyer {
+    left: clamp(300px, 44vw, 632px);
+    top: clamp(500px, 64vh, 640px);
+    width: clamp(150px, 15vw, 190px);
+  }
+  [data-theme="segnale"] .stage--live .slot--polaroid {
+    left: auto;
+    right: clamp(30px, 12vw, 180px);
+    top: clamp(185px, 24vh, 238px);
+    width: clamp(160px, 17vw, 220px);
+  }
+}
+
+/* Sotto i 960px il copy resta desktop/editoriale, mentre il pannello scende
+   sotto le CTA. Stessi elementi e stessi assi: cambia soltanto la geometria
+   verticale necessaria per non creare collisioni. */
+@media (min-width: 768px) and (max-width: 959px) {
+  [data-theme="segnale"] .stage--live .hero-copy {
+    padding-top: 12px;
+  }
+
+  [data-theme="segnale"] .stage--live .lead {
+    margin-top: 20px;
+  }
+
+  [data-theme="segnale"] .stage--live .cta-row {
+    margin-top: 16px;
+    gap: 20px;
+  }
+
+  [data-theme="segnale"] .stage--live .glass-panel--live {
+    top: auto;
+    bottom: 16px;
+    height: clamp(380px, 48vh, 430px);
+  }
+
+  [data-theme="segnale"] .stage--live .glass-panel-inner {
+    padding: 20px;
+  }
+
+  [data-theme="segnale"] .stage--live .plan-caption {
+    margin-bottom: 12px;
+  }
+
+  [data-theme="segnale"] .stage--live .plan-list {
+    gap: 9px;
+  }
+
+  [data-theme="segnale"] .stage--live .plan-card {
+    padding: 14px 16px 15px;
+  }
+
+  [data-theme="segnale"] .stage--live .slot--social {
+    top: 52vh;
+  }
+}
+
+/* Sotto i 1100px la costellazione destra scende dopo l'headline: il rapporto
+   review → orari resta identico, ma non condivide più lo stesso piano del
+   titolo. Il pannello si abbassa quanto basta per conservare entrambi. */
+@media (min-width: 768px) and (max-width: 1099px) {
+  [data-theme="segnale"] .stage--live .slot--review {
+    top: clamp(200px, 22vw, 230px);
+  }
+
+  [data-theme="segnale"] .stage--live .slot--polaroid {
+    top: clamp(350px, 38vw, 410px);
+  }
+}
+
+@media (min-width: 960px) and (max-width: 1099px) {
+  [data-theme="segnale"] .stage--live .glass-panel--live {
+    top: 42vh;
+    height: calc(100% - 42vh - 16px);
+  }
+}

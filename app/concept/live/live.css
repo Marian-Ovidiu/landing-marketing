@@ -1,0 +1,372 @@
+/* Prototipo motion — route /concept/live.
+   Il canvas mantiene le geometrie di riferimento (1440x1000 / 390x844);
+   le parti animate usano solo transform, opacity e filter. */
+
+.stage--live {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--surface-canvas);
+  background-image: url("/assets/hero-surface-texture-v2-1024.webp");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stage--live .hero-texture {
+  display: none;
+}
+
+.live-canvas {
+  position: relative;
+  width: 1440px;
+  height: 1000px;
+  flex: none;
+}
+
+/* ---------- posizioni iniziali frammenti (desktop = stato statico) ---------- */
+.stage--live .slot--receipt { left: 130px; top: 645px; width: 185px; }
+.stage--live .slot--note { left: 360px; top: 698px; width: 250px; }
+.stage--live .slot--review { left: 1120px; top: 82px; width: 230px; }
+.stage--live .slot--social { left: 600px; top: 428px; width: 230px; }
+.stage--live .slot--flyer { left: 632px; top: 640px; width: 190px; }
+.stage--live .slot--polaroid { left: 1040px; top: 238px; width: 220px; }
+
+/* wrapper per la pointer-parallax: si muove indipendentemente dalla timeline */
+.drift {
+  will-change: auto;
+}
+
+/* i frammenti sono decorativi nella route live: non devono intercettare tap */
+.stage--live .slot {
+  pointer-events: none;
+}
+
+/* sonde per misurare svh/dvh reali (debug HUD) */
+.vh-probe {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  width: 1px;
+  visibility: hidden;
+  pointer-events: none;
+}
+.vh-probe--svh {
+  height: 100svh;
+}
+.vh-probe--dvh {
+  height: 100dvh;
+}
+
+/* ---------- glass panel live: fill e riflesso su layer separati ---------- */
+.stage--live .glass-panel--live {
+  left: 790px;
+  top: 410px;
+  width: 480px;
+  height: 500px;
+  background: transparent;
+  box-shadow:
+    0 2px 4px rgba(var(--ink-rgb), 0.12),
+    0 24px 56px rgba(var(--ink-rgb), 0.18);
+}
+.stage--live .glass-panel--live::before {
+  display: none; /* il riflesso è un layer reale animabile */
+}
+.glass-panel-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(var(--ink-rgb), 0.26);
+  box-shadow:
+    inset 0 1px 0 rgba(251, 247, 238, 0.42),
+    inset 0 26px 48px -26px rgba(251, 247, 238, 0.14),
+    inset 0 -30px 46px -30px rgba(var(--ink-rgb), 0.3);
+  pointer-events: none;
+}
+.glass-panel-reflect {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    115deg,
+    rgba(251, 247, 238, 0) 32%,
+    rgba(251, 247, 238, 0.06) 46%,
+    rgba(251, 247, 238, 0) 60%
+  );
+  pointer-events: none;
+}
+
+/* ---------- ombre pilotate da CSS var (paint-only, niente layout) ---------- */
+.stage--live .plan-card {
+  box-shadow:
+    0 1px 0 rgba(var(--ink-rgb), calc(0.14 * var(--card-sh, 1))),
+    0 8px 20px rgba(var(--ink-rgb), calc(0.12 * var(--card-sh, 1)));
+}
+.stage--live .cta-primary {
+  box-shadow:
+    0 2px 6px rgba(156, 68, 35, calc(0.28 + 0.08 * var(--cta-sh, 0))),
+    0 calc(4px * var(--cta-sh, 0)) calc(14px * var(--cta-sh, 0))
+      rgba(156, 68, 35, calc(0.3 * var(--cta-sh, 0)));
+}
+
+/* ---------- mobile: tre aree grid (04B composition pass) ----------
+   Riferimenti: 390x844, 393x852, 360x800 (portrait).
+   content-header (auto) / visual-stage (minmax(0,1fr)) / cta-area (auto).
+   Gli elementi visuali sono posizionati rispetto al visual-stage
+   (.fragment-field), mai con coordinate assolute sulla viewport. */
+@media (max-width: 767px) {
+  .stage--live {
+    height: 100svh; /* niente salti quando la barra indirizzi collassa */
+  }
+  .live-canvas {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 100%;
+    /* nav / headline / lead / visual-stage / cta */
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  }
+  .stage--live .nav {
+    grid-row: 1;
+    height: 52px;
+    padding: 0 var(--hero-padding-x-mobile);
+  }
+  .stage--live .nav-links {
+    display: none;
+  }
+  .stage--live .nav-wordmark {
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  /* il blocco testo si dissolve nel grid: headline e lead diventano righe */
+  .stage--live .hero-copy {
+    display: contents;
+  }
+  .stage--live .headline {
+    grid-row: 2;
+    position: relative;
+    z-index: 30;
+    padding: 2px var(--hero-padding-x-mobile) 0;
+    font-size: 28px;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    max-width: none;
+  }
+  .stage--live .lead {
+    grid-row: 3;
+    position: relative;
+    z-index: 30;
+    padding: 10px var(--hero-padding-x-mobile) 0;
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.45;
+    width: auto;
+    max-width: 360px;
+  }
+
+  /* visual-stage: area elastica; slot posizionati in % della sua altezza */
+  .stage--live .fragment-field {
+    grid-row: 4;
+    grid-column: 1;
+    position: relative;
+    z-index: 10;
+    min-height: 0;
+  }
+  .stage--live .slot--note,
+  .stage--live .slot--social {
+    display: none;
+  }
+  .stage--live .slot--receipt { left: 18px; top: 5%; width: 102px; }
+  .stage--live .slot--review { left: auto; right: 18px; top: 16%; width: 142px; }
+  .stage--live .slot--flyer { left: 56px; top: 44%; width: 106px; }
+  .stage--live .slot--polaroid {
+    left: auto;
+    right: 18px;
+    top: auto;
+    bottom: 3%;
+    width: 118px;
+  }
+  .stage--live .receipt-paper { padding: 12px 10px 18px; }
+  .stage--live .receipt-line,
+  .stage--live .receipt-row,
+  .stage--live .receipt-sep { font-size: 10px; }
+  .stage--live .review-paper { padding: 12px; gap: 6px; }
+  .stage--live .review-quote { font-size: 12px; }
+  .stage--live .review-author { font-size: 11px; }
+  .stage--live .flyer-paper { padding: 32px 10px 0; }
+  .stage--live .flyer-title { font-size: 15px; }
+  .stage--live .flyer-sub { font-size: 11px; margin-top: 4px; }
+  .stage--live .flyer-band { font-size: 10px; padding: 6px 10px 7px; }
+  .stage--live .flyer-circle { width: 60px; height: 60px; top: -18px; right: -15px; }
+  .stage--live .polaroid-frame { padding: 7px 7px 26px; }
+
+  /* pannello: item della stessa cella del visual-stage, centrato verticalmente
+     tra descrizione e CTA; lo stato iniziale (basso) è un translateY GSAP */
+  .stage--live .glass-panel--live {
+    grid-row: 4;
+    grid-column: 1;
+    position: relative;
+    align-self: center;
+    left: 0;
+    top: 0;
+    right: auto;
+    bottom: auto;
+    width: auto;
+    margin: 0 12px;
+    height: 342px;
+    max-height: calc(100% - 44px); /* respiro minimo: ~22px sopra e sotto */
+    z-index: 20;
+  }
+  .stage--live .glass-panel-inner { padding: 16px; }
+  .stage--live .plan-caption { font-size: 11px; margin-bottom: 10px; }
+  .stage--live .plan-list { gap: 10px; }
+  .stage--live .plan-card { padding: 11px 14px 13px; gap: 12px; }
+  .stage--live .plan-card-number { font-size: 24px; }
+  .stage--live .plan-card-title { font-size: 15px; }
+  .stage--live .plan-card-detail { font-size: 12px; margin-top: 2px; }
+
+  /* cta-area: riga inferiore del grid, protetta dalla safe area */
+  .stage--live .cta-row {
+    grid-row: 5;
+    position: relative;
+    z-index: 30;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    margin: 0;
+    padding: 12px var(--hero-padding-x-mobile)
+      calc(10px + env(safe-area-inset-bottom));
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+  }
+  .stage--live .cta-primary {
+    width: 100%;
+    justify-content: center;
+    padding: 14px 24px;
+  }
+  .stage--live .cta-secondary {
+    min-height: 44px;
+    font-size: 14px;
+  }
+}
+
+/* ---------- reduced motion: composizione statica, nessun pin ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .stage--live {
+    height: auto;
+    min-height: 100vh;
+    padding: 0;
+  }
+}
+/* mobile reduced: il canvas fluido ha bisogno di un'altezza reale
+   perché pannello e CTA sono ancorati al fondo */
+@media (prefers-reduced-motion: reduce) and (max-width: 767px) {
+  .stage--live {
+    height: 100svh;
+    min-height: 640px;
+  }
+}
+
+/* ---------- Polaroid ambient (nativo, sostituisce il video v1) ----------
+   Fotografia che respira: drift lentissimo della foto, banda di luce calda
+   diagonale, micro-highlight sui bicchieri. Confinato in .polaroid-window,
+   time-based ma pausabile (IntersectionObserver → .ambient-paused). */
+@keyframes polaroid-drift {
+  from {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.015) translate3d(1.6px, -1.2px, 0);
+  }
+}
+@keyframes polaroid-light-sweep {
+  from {
+    transform: translate3d(-7%, -5%, 0);
+    opacity: 0.05;
+  }
+  to {
+    transform: translate3d(7%, 5%, 0);
+    opacity: 0.08;
+  }
+}
+@keyframes polaroid-glint-breathe {
+  from {
+    opacity: 0.03;
+  }
+  to {
+    opacity: 0.07;
+  }
+}
+.stage--live .polaroid-photo {
+  animation: polaroid-drift 8s ease-in-out infinite alternate;
+}
+.stage--live .polaroid-light {
+  animation: polaroid-light-sweep 9s ease-in-out infinite alternate;
+}
+.stage--live .polaroid-glint {
+  animation: polaroid-glint-breathe 7s ease-in-out infinite alternate;
+}
+/* pausa quando la Polaroid non è visibile */
+.stage--live .polaroid-window.ambient-paused .polaroid-photo,
+.stage--live .polaroid-window.ambient-paused .polaroid-light,
+.stage--live .polaroid-window.ambient-paused .polaroid-glint {
+  animation-play-state: paused;
+}
+/* reduced motion: nessun ambient, layer invisibili (opacity base 0) */
+@media (prefers-reduced-motion: reduce) {
+  .stage--live .polaroid-photo,
+  .stage--live .polaroid-light,
+  .stage--live .polaroid-glint {
+    animation: none !important;
+  }
+}
+
+/* ---------- debug overlay (?debug=1) ---------- */
+.debug-hud {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 100;
+  /* overlay di sviluppo: tinta fissa, fuori dal theming (--ink-rgb) */
+  background: rgba(34, 26, 17, 0.85);
+  color: #fbf7ee;
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 10px 14px;
+  border-radius: 6px;
+  pointer-events: none;
+}
+.debug-panel-box {
+  position: absolute;
+  border: 1px dashed rgba(192, 90, 51, 0.9);
+  z-index: 90;
+  pointer-events: none;
+}
+.debug-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: rgba(192, 90, 51, 0.9);
+  box-shadow: 0 0 0 2px rgba(251, 247, 238, 0.8);
+  z-index: 90;
+  pointer-events: none;
+}
+.debug-dot-label {
+  position: absolute;
+  transform: translate(8px, -6px);
+  font-family: var(--font-mono), monospace;
+  font-size: 9px;
+  color: #221a11;
+  background: rgba(251, 247, 238, 0.85);
+  padding: 0 3px;
+  white-space: nowrap;
+}

@@ -1,0 +1,277 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { week } from "./week.content";
+
+// S02 Segnale — «Operational Rhythm» (art direction approvata in
+// outputs/segnale-s02-art-direction.md). La settimana è una cadenza: una
+// banda hairline a sette intervalli, tre masse tipografiche (preparazione /
+// attivazione / verifica) e quattro giorni di mantenimento quieti.
+// La fonte condivisa resta week.content.ts; le stringhe qui sotto sono la
+// mappatura editoriale specifica di Segnale e non cambiano la Direzione A.
+
+const guillemets = (value: string) => value.replaceAll("“", "«").replaceAll("”", "»");
+
+const byId = (id: string) => week.find((item) => item.id === id)!;
+const lun = byId("lunedi");
+
+const [marLineOne, marLineTwo] = ["Prepara «Il martedì della casa»:", "menu fisso a 18€."];
+const [domLineOne, domLineTwo] = ["Registra i tre numeri", "della settimana."];
+
+// giorni di mantenimento: MER GIO VEN SAB (ordine reale della settimana)
+const quietDays = [
+  {
+    ...byId("mercoledi"),
+    wide: "10 RISPOSTE · 45 MIN",
+    narrow: "45 MIN",
+    mobile: "MER · PREPARA E PUBBLICA 10 RISPOSTE · 45 MIN",
+    accessible:
+      "Mercoledì: prepara, rileggi e pubblica manualmente dieci risposte alle recensioni. Durata 45 minuti. Obiettivo: rispondere con continuità. Risultato da registrare manualmente: recensioni a cui hai risposto.",
+  },
+  {
+    ...byId("giovedi"),
+    wide: "APERITIVO · 30 MIN",
+    narrow: "30 MIN",
+    mobile: "GIO · PUBBLICA L’APERITIVO · 30 MIN",
+    accessible:
+      "Giovedì: pubblica manualmente l’aperitivo su Instagram. Durata 30 minuti. Obiettivo: mostrare la proposta nella fascia 18–20. Risultato da registrare manualmente: richieste riferite all’iniziativa.",
+  },
+  {
+    ...byId("venerdi"),
+    wide: "QR RECENSIONI · 20 MIN",
+    narrow: "20 MIN",
+    mobile: "VEN · BIGLIETTINO RECENSIONI CON QR · 20 MIN",
+    accessible:
+      "Venerdì: prepara e metti sui tavoli il bigliettino per le recensioni con codice QR. Durata 20 minuti. Obiettivo: facilitare una recensione dopo il servizio. Risultato da registrare manualmente: recensioni nuove.",
+  },
+  {
+    ...byId("sabato"),
+    wide: "10 FOTO · 30 MIN",
+    narrow: "30 MIN",
+    mobile: "SAB · SCATTA 10 FOTO DURANTE IL SERVIZIO · 30 MIN",
+    accessible:
+      "Sabato: scatta manualmente dieci foto durante il servizio. Durata 30 minuti. Obiettivo: creare materiale per le attività di contenuto. Risultato da osservare: dieci foto utilizzabili.",
+  },
+];
+
+const DAYS = ["LUN", "MAR", "MER", "GIO", "VEN", "SAB", "DOM"] as const;
+
+// Un solo SVG strutturale: banda, tick, accenti e marker (aria-hidden).
+// Gruppo desktop (viewBox 1248×590, banda y260, gradino y278 da x1070) e
+// gruppo mobile (tre frammenti autonomi). Nessun testo.
+function RhythmBand() {
+  return (
+    <svg
+      className="segnale-s02-band"
+      viewBox="0 0 1248 590"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <g className="segnale-s02-band-desktop">
+        <path data-band-base pathLength="1" d="M0 260 H1070 V278 H1248" />
+        <path className="segnale-s02-tick" d="M178.3 257 V263 M356.6 257 V263 M534.9 257 V263 M713.1 257 V263 M891.4 257 V263" />
+        <path className="segnale-s02-accent" data-accent-lun pathLength="1" d="M0 260 H84" />
+        <path className="segnale-s02-accent" data-accent-mar pathLength="1" d="M178.3 260 H262" />
+        <path className="segnale-s02-accent" data-accent-dom pathLength="1" d="M1070 278 H1154" />
+        <circle data-marker-lun cx="8" cy="260" r="4" />
+        <circle data-marker-mar cx="186" cy="260" r="4" />
+        <circle data-marker-dom cx="1078" cy="278" r="4" />
+      </g>
+
+      {/* Coordinate mobile espresse nelle unità del viewBox condiviso
+          (1248×590) e rese in un box da 350×548: x×3.5657, y×1.0766.
+          I marker sono ellissi pre-compensate per restare cerchi da 4px. */}
+      <g className="segnale-s02-band-mobile">
+        <path data-band-base pathLength="1" d="M0 24.8 H684.6 M0 206.7 H755.9 M0 464 H527.7" />
+        <path className="segnale-s02-accent" data-accent-lun pathLength="1" d="M0 24.8 H228.2" />
+        <path className="segnale-s02-accent" data-accent-mar pathLength="1" d="M0 206.7 H228.2" />
+        <path className="segnale-s02-accent" data-accent-dom pathLength="1" d="M0 464 H228.2" />
+        <ellipse data-marker-lun cx="21.4" cy="24.8" rx="14.3" ry="4.3" />
+        <ellipse data-marker-mar cx="21.4" cy="206.7" rx="14.3" ry="4.3" />
+        <ellipse data-marker-dom cx="21.4" cy="464" rx="14.3" ry="4.3" />
+      </g>
+    </svg>
+  );
+}
+
+export function SegnaleWeeklyRhythm() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const ctx = gsap.context(() => {
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const all = <T extends Element>(selector: string) =>
+          gsap.utils.toArray<T>(section.querySelectorAll(selector));
+        const bands = all<SVGPathElement>("[data-band-base]");
+        const accents = {
+          lun: all<SVGPathElement>("[data-accent-lun]"),
+          mar: all<SVGPathElement>("[data-accent-mar]"),
+          dom: all<SVGPathElement>("[data-accent-dom]"),
+        };
+        const markers = {
+          lun: all<SVGCircleElement>("[data-marker-lun]"),
+          mar: all<SVGCircleElement>("[data-marker-mar]"),
+          dom: all<SVGCircleElement>("[data-marker-dom]"),
+        };
+        const massLun = section.querySelector("[data-mass-lun]");
+        const massMar = section.querySelector("[data-mass-mar]");
+        const massDom = section.querySelector("[data-mass-dom]");
+        const quiet = all<HTMLElement>("[data-quiet]");
+        const dayStrong = {
+          lun: all<HTMLElement>("[data-day-lun]"),
+          mar: all<HTMLElement>("[data-day-mar]"),
+          dom: all<HTMLElement>("[data-day-dom]"),
+        };
+        const closing = section.querySelector("[data-closing]");
+
+        // Stato «settimana aperta»: nessun teal, banda non ancora disegnata,
+        // masse presenti come ombre a dimensione piena (grammatica S01).
+        gsap.set(bands, { strokeDasharray: 1, strokeDashoffset: 1 });
+        gsap.set([...accents.lun, ...accents.mar, ...accents.dom], {
+          strokeDasharray: 1,
+          strokeDashoffset: 1,
+        });
+        gsap.set([...markers.lun, ...markers.mar, ...markers.dom], {
+          stroke: "var(--s02-line)",
+        });
+        gsap.set([massLun, massMar], { opacity: 0.3, y: 10 });
+        gsap.set(massDom, { opacity: 0.3, y: 10 });
+        gsap.set(quiet, { opacity: 0.6 });
+        gsap.set([...dayStrong.lun, ...dayStrong.mar, ...dayStrong.dom], { opacity: 0.62 });
+        gsap.set(closing, { opacity: 0.12, y: 8 });
+
+        const timeline = gsap.timeline({
+          defaults: { ease: "none" },
+          scrollTrigger: {
+            trigger: section,
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 0.12,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        timeline
+          // 0–15 · settimana aperta: la banda hairline si completa
+          .to(bands, { strokeDashoffset: 0, duration: 15 }, 0)
+          // 15–35 · preparazione: LUN si forma, poi il marker guadagna teal
+          .to(massLun, { opacity: 1, y: 0, duration: 20 }, 15)
+          .to(accents.lun, { strokeDashoffset: 0, duration: 12 }, 20)
+          .to(dayStrong.lun, { opacity: 1, duration: 10 }, 20)
+          .to(markers.lun, { stroke: "var(--accent-primary)", duration: 3 }, 32)
+          // 35–60 · attivazione: MAR si forma, i giorni quieti arretrano
+          .to(massMar, { opacity: 1, y: 0, duration: 25 }, 35)
+          .to(accents.mar, { strokeDashoffset: 0, duration: 14 }, 40)
+          .to(dayStrong.mar, { opacity: 1, duration: 10 }, 40)
+          .to(quiet, { opacity: 0.42, duration: 25 }, 35)
+          .to(massDom, { opacity: 0.45, y: 6, duration: 22 }, 36)
+          .to(markers.mar, { stroke: "var(--accent-primary)", duration: 3 }, 57)
+          // 60–80 · verifica: DOM completa il gradino
+          .to(massDom, { opacity: 1, y: 0, duration: 20 }, 60)
+          .to(accents.dom, { strokeDashoffset: 0, duration: 12 }, 64)
+          .to(dayStrong.dom, { opacity: 1, duration: 10 }, 64)
+          .to(markers.dom, { stroke: "var(--accent-primary)", duration: 3 }, 77)
+          // 80–100 · piano eseguibile: i quieti risalgono, la chiusa si compie
+          .to(quiet, { opacity: 0.58, duration: 15 }, 82)
+          .to(closing, { opacity: 1, y: 0, duration: 16 }, 82);
+      });
+    }, section);
+
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <section
+      id="section-02-esempio-di-piano"
+      className="segnale-weekly-rhythm"
+      ref={sectionRef}
+      aria-labelledby="segnale-s02-title"
+    >
+      <div className="segnale-weekly-rhythm-sticky">
+        <div className="segnale-weekly-rhythm-inner">
+          <header className="segnale-s02-header">
+            <p className="segnale-s02-kicker">COME FUNZIONA · ESEMPIO OSTERIA DA RITA</p>
+            <h2 id="segnale-s02-title">Racconti il locale. Segnale organizza la settimana.</h2>
+            <p className="segnale-s02-intro">
+              Dal profilo alle missioni. Completi le attività e registri a mano pochi risultati nel riepilogo base.
+            </p>
+            <p className="segnale-s02-disclaimer">
+              PROFILO → STRATEGIA → PIANO → MISSIONI → RISULTATI
+            </p>
+          </header>
+
+          <div className="segnale-s02-field">
+            <article className="segnale-s02-mass segnale-s02-mass--lun" data-mass-lun aria-labelledby="segnale-s02-lun">
+              <p className="segnale-s02-label">LUNEDÌ · PREPARAZIONE</p>
+              <h3 id="segnale-s02-lun">{guillemets(lun.action)}.</h3>
+              <p className="segnale-s02-result">Obiettivo: farti trovare da chi cerca «dove mangiare» in zona.</p>
+              <p className="segnale-s02-meta">2 ORE · SCHEDA GOOGLE · AGGIORNAMENTO MANUALE</p>
+            </article>
+
+            <article className="segnale-s02-mass segnale-s02-mass--mar" data-mass-mar aria-labelledby="segnale-s02-mar">
+              <p className="segnale-s02-label">MARTEDÌ SERA · ATTIVAZIONE NEL GIORNO VUOTO</p>
+              <h3 id="segnale-s02-mar">
+                <span>{marLineOne}</span> <span>{marLineTwo}</span>
+              </h3>
+              <p className="segnale-s02-result">Obiettivo: dare un motivo per venire nel giorno che oggi resta vuoto.</p>
+              <p className="segnale-s02-meta">
+                <span className="segnale-s02-meta-wide">1 ORA · SALA + CARTELLO IN VETRINA · OSSERVA I COPERTI</span>
+                <span className="segnale-s02-meta-mobile">1 ORA · SALA + VETRINA · OSSERVA I COPERTI</span>
+              </p>
+            </article>
+
+            <ul className="segnale-s02-quiet-list" aria-label="Giorni di mantenimento">
+              {quietDays.map((item) => (
+                <li key={item.id} data-quiet aria-label={item.accessible}>
+                  <span className="segnale-s02-quiet-wide">{item.wide}</span>
+                  <span className="segnale-s02-quiet-narrow">{item.narrow}</span>
+                  <span className="segnale-s02-quiet-mobile">{item.mobile}</span>
+                </li>
+              ))}
+            </ul>
+
+            <article className="segnale-s02-mass segnale-s02-mass--dom" data-mass-dom aria-labelledby="segnale-s02-dom">
+              <p className="segnale-s02-label">DOMENICA · VERIFICA</p>
+              <h3 id="segnale-s02-dom">
+                <span>{domLineOne}</span> <span>{domLineTwo}</span>
+              </h3>
+              <p className="segnale-s02-result">I risultati restano nel riepilogo per le verifiche successive.</p>
+              <p className="segnale-s02-meta">
+                <span className="segnale-s02-meta-wide">15 MINUTI · INSERIMENTO MANUALE · RIEPILOGO BASE</span>
+                <span className="segnale-s02-meta-mobile">15 MIN · INSERIMENTO MANUALE · RIEPILOGO BASE</span>
+              </p>
+            </article>
+
+            <p className="segnale-s02-days" aria-hidden="true">
+              {DAYS.map((day, index) => {
+                const strong =
+                  index === 0 ? { "data-day-lun": "" } : index === 1 ? { "data-day-mar": "" } : index === 6 ? { "data-day-dom": "" } : { "data-quiet": "" };
+                return (
+                  <span key={day} className={`segnale-s02-day segnale-s02-day--${index}`} {...strong}>
+                    {day}
+                  </span>
+                );
+              })}
+            </p>
+
+            <RhythmBand />
+          </div>
+
+          <footer className="segnale-s02-closing" data-closing>
+            <p className="segnale-s02-total">Cinque ore e venti in tutta la settimana, nell’esempio.</p>
+            <p className="segnale-s02-total-detail">
+              Lun prepari · mar attivi · dom registri a mano.
+            </p>
+          </footer>
+        </div>
+      </div>
+    </section>
+  );
+}

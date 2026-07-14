@@ -1,0 +1,117 @@
+/* Design token — runs/2026-07-10-marketing-strategy-generator/outputs/design-tokens.json */
+:root {
+  /* theming (base condivisa Direzione A/B — outputs/apple-component-mapping.md §1):
+     l'inchiostro come tripletta RGB, così ombre e filetti seguono il tema.
+     La Direzione B sovrascriverà --ink-rgb e gli alias semantici in uno scope
+     [data-theme="segnale"]. */
+  --ink-rgb: 34, 26, 17;
+
+  /* colors.surface */
+  --surface-canvas: #f2ebde;
+  --surface-canvas-deep: #e7ddcb;
+  --surface-paper: #fbf7ee;
+  --surface-paper-thermal: #f7f3e6;
+  --surface-ink: #221a11;
+
+  /* colors.text */
+  --text-primary: #221a11;
+  --text-secondary: #5d5344;
+  --text-on-glass: #fbf7ee;
+  --text-on-accent: #fbf7ee;
+
+  /* colors.accent */
+  --accent-terracotta: #c05a33;
+  --accent-terracotta-deep: #9c4423;
+  --accent-olive: #5c6b4c;
+  --accent-brass: #a2854f;
+
+  /* colors.glass */
+  --glass-smoke-fill: rgba(var(--ink-rgb), 0.38);
+  --glass-smoke-stroke: rgba(251, 247, 238, 0.16);
+  --glass-smoke-highlight: rgba(251, 247, 238, 0.28);
+
+  /* spacing */
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  --space-2xl: 64px;
+  --space-3xl: 96px;
+  --space-4xl: 144px;
+  --hero-padding-x-desktop: 96px;
+  --hero-padding-x-mobile: 20px;
+
+  /* radius */
+  --radius-paper: 3px;
+  --radius-plan-card: 10px;
+  --radius-glass-panel: 22px;
+  --radius-pill: 999px;
+
+  /* shadow */
+  --shadow-fragment-floating: 0 1px 2px rgba(var(--ink-rgb), 0.1),
+    0 10px 28px rgba(var(--ink-rgb), 0.1);
+  --shadow-fragment-resting: 0 1px 2px rgba(var(--ink-rgb), 0.1),
+    0 4px 12px rgba(var(--ink-rgb), 0.08);
+  --shadow-glass-panel: 0 2px 4px rgba(var(--ink-rgb), 0.12),
+    0 24px 56px rgba(var(--ink-rgb), 0.18), inset 0 1px 0 rgba(251, 247, 238, 0.28);
+  --shadow-plan-stack: 0 1px 0 rgba(var(--ink-rgb), 0.14),
+    0 8px 20px rgba(var(--ink-rgb), 0.12);
+  --shadow-cta-resting: 0 2px 6px rgba(156, 68, 35, 0.28);
+  --shadow-cta-emphasis: 0 4px 14px rgba(156, 68, 35, 0.38);
+
+  /* blur */
+  --blur-glass-backdrop: 18px;
+  --blur-fragment-absorbed: 6px;
+
+  /* alias semantici (fase preliminare Direzione B — nessun consumo ancora):
+     i componenti continuano a usare i token storici; questi alias sono il
+     punto di override per i temi. Nel tema A puntano a carta/terracotta.
+     --text-primary e --text-secondary esistono già sopra come token semantici. */
+  --accent-primary: var(--accent-terracotta);
+  --accent-primary-deep: var(--accent-terracotta-deep);
+  --surface-primary: var(--surface-canvas);
+  --surface-secondary: var(--surface-canvas-deep);
+  --line-subtle: rgba(var(--ink-rgb), 0.14);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  background: var(--surface-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Grana cartacea condivisa (hero-paper-grain-overlay): SOLO su materiali cartacei.
+   Convive con la grana globale entro il budget visivo definito nel manifest. */
+.paper-grain {
+  position: relative;
+}
+.paper-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("/assets/hero-paper-grain-512.webp") repeat;
+  background-size: 512px 512px;
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -1,0 +1,244 @@
+/* Sezione 04 — CTA finale: la scena calma.
+   Nessun nuovo oggetto, nessuna metafora: intonaco chiaro, tipografia,
+   CTA e spazio intenzionale. Nessuna timeline, nessun pin, nessuna runway. */
+
+.final-cta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 86svh;
+  padding-top: 132px;
+  overflow: clip;
+  /* alleggerimento progressivo: dal canvas del fascicolo alla carta,
+     senza bordo netto tra le sezioni */
+  background: linear-gradient(
+    to bottom,
+    var(--surface-canvas) 0,
+    var(--surface-paper) 300px
+  );
+  color: var(--text-primary);
+}
+
+/* texture approvata, a densità ridotta e in dissolvenza verso il basso */
+.final-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("/assets/hero-surface-texture-v2-1024.webp");
+  background-size: 1024px 1024px;
+  opacity: 0.4;
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.35));
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.35));
+  pointer-events: none;
+}
+
+/* ---------- asse editoriale identico alle testate precedenti ---------- */
+.final-cta-layout,
+.final-footer-layout {
+  position: relative;
+  width: min(1180px, calc(100% - 112px));
+  margin-inline: auto;
+}
+
+@media (min-width: 1024px) {
+  .final-cta-layout,
+  .final-footer-layout {
+    left: 50%;
+    width: 1440px;
+    padding-inline: var(--hero-padding-x-desktop);
+    margin-inline: 0;
+    transform: translateX(-50%);
+  }
+}
+
+/* ---------- heading: fermo, mai animato ---------- */
+.final-cta h2 {
+  max-width: 900px;
+  font-family: var(--font-display), "Iowan Old Style", Georgia, serif;
+  /* 52px è la taglia massima a cui la prima frase resta su una riga
+     dentro i 900px (a 54px misura già 909px): niente «gestire.» orfano */
+  font-size: clamp(38px, 4.4vw, 52px);
+  font-weight: 570;
+  font-variation-settings: "opsz" 120, "SOFT" 40;
+  letter-spacing: -0.018em;
+  line-height: 1.06;
+}
+
+.final-cta-em {
+  font-style: italic;
+  color: var(--accent-terracotta-deep);
+}
+
+/* ---------- azioni ---------- */
+.final-cta-actions {
+  display: flex;
+  align-items: center;
+  gap: 44px;
+  margin-top: 52px;
+}
+
+.final-cta-primary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 56px;
+  padding: 18px 34px;
+  background: var(--accent-terracotta-deep);
+  border-radius: var(--radius-pill);
+  color: var(--text-on-accent);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  line-height: 1;
+  text-decoration: none;
+  box-shadow: var(--shadow-cta-resting);
+  /* ingresso una-tantum: da 3px e ombra resting allo stato disteso */
+  transition: box-shadow 300ms ease-out, transform 300ms ease-out;
+}
+
+.final-cta[data-enter="pending"] .final-cta-primary {
+  transform: translateY(3px);
+}
+
+.final-cta[data-enter="done"] .final-cta-primary,
+.final-cta[data-enter="idle"] .final-cta-primary {
+  transform: translateY(0);
+  box-shadow: var(--shadow-cta-emphasis);
+}
+
+.final-cta-primary:focus-visible {
+  outline: 2px solid var(--surface-ink);
+  outline-offset: 3px;
+}
+
+.final-cta-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--text-primary);
+  font-size: 17px;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(var(--ink-rgb), 0.45);
+  text-underline-offset: 5px;
+}
+
+.final-cta-secondary:focus-visible {
+  outline: 2px dashed var(--accent-terracotta);
+  outline-offset: 3px;
+}
+
+.final-cta-arrow {
+  display: inline-block; /* esclude la freccia dall'underline */
+  transition: transform 180ms ease-out;
+}
+
+.final-cta-secondary:hover .final-cta-arrow,
+.final-cta-secondary:focus-visible .final-cta-arrow {
+  transform: translateY(-4px);
+}
+
+/* ---------- microcopy ---------- */
+.final-cta-micro {
+  margin-top: 30px;
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  color: var(--text-secondary);
+  opacity: 1;
+  transition: opacity 300ms ease-out;
+}
+
+.final-cta[data-enter="pending"] .final-cta-micro { opacity: 0.75; }
+
+/* ---------- footer minimo ---------- */
+.final-footer {
+  margin-top: auto;
+  padding: 96px 0 calc(22px + env(safe-area-inset-bottom));
+}
+
+.final-footer p {
+  max-width: 560px;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* ---------- tablet ---------- */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .final-cta-layout,
+  .final-footer-layout { width: calc(100% - 112px); }
+  .final-cta h2 { font-size: 44px; }
+  /* sotto i ~858px la prima frase non sta su una riga a 44px:
+     a capo naturale come su mobile, mai una parola orfana */
+  .final-cta-break { display: none; }
+}
+
+/* ---------- mobile ---------- */
+@media (max-width: 767px) {
+  .final-cta {
+    min-height: 0;
+    padding-top: 108px;
+    background: linear-gradient(
+      to bottom,
+      var(--surface-canvas) 0,
+      var(--surface-paper) 220px
+    );
+  }
+
+  .final-cta-layout,
+  .final-footer-layout { width: calc(100% - 32px); }
+
+  .final-cta h2 {
+    font-size: clamp(30px, 8.6vw, 36px);
+    line-height: 1.08;
+  }
+
+  .final-cta-break { display: none; } /* a capo naturale su 3-4 righe */
+
+  .final-cta-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
+    margin-top: 40px;
+  }
+
+  .final-cta-primary {
+    justify-content: center;
+    width: 100%;
+    font-size: 17px;
+  }
+
+  .final-cta-secondary {
+    justify-content: center;
+    font-size: 15px;
+  }
+
+  .final-cta-micro {
+    margin-top: 24px;
+    font-size: 11px;
+    line-height: 1.7;
+    max-width: 330px;
+  }
+
+  /* niente vuoto morto sotto le CTA */
+  .final-footer { padding: 72px 0 calc(18px + env(safe-area-inset-bottom)); }
+  .final-footer p { font-size: 10px; }
+}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .final-cta[data-enter] .final-cta-primary {
+    transform: none;
+    box-shadow: var(--shadow-cta-emphasis);
+    transition: none;
+  }
+  .final-cta[data-enter] .final-cta-micro { opacity: 1; transition: none; }
+  .final-cta-arrow { transition: none; }
+  .final-cta-secondary:hover .final-cta-arrow,
+  .final-cta-secondary:focus-visible .final-cta-arrow { transform: none; }
+}

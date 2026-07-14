@@ -1,0 +1,466 @@
+/* S01 Segnale — Editorial Tracing A2. Scoped to the dedicated rendering. */
+.segnale-how-it-works {
+  --s01-line: #cfd6d9;
+  height: 185svh;
+  background: var(--surface-canvas);
+  color: var(--text-primary);
+}
+
+.segnale-how-it-works-sticky {
+  position: sticky;
+  top: 0;
+  min-height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background: var(--surface-canvas);
+}
+
+.segnale-how-it-works-inner {
+  position: relative;
+  width: min(100%, 1440px);
+  min-height: min(900px, 100svh);
+  margin-inline: auto;
+  padding: 38px 96px 30px;
+}
+
+.segnale-how-it-works-header {
+  padding-bottom: 21px;
+  border-bottom: 1px solid var(--s01-line);
+}
+
+.segnale-s01-kicker,
+.segnale-s01-label {
+  margin: 0;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.125em;
+  color: var(--text-secondary);
+}
+
+.segnale-how-it-works-header h2 {
+  margin: 12px 0 8px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 51px;
+  font-weight: 620;
+  line-height: 1.04;
+  letter-spacing: -0.028em;
+}
+
+.segnale-s01-intro {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.segnale-story {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: 326px auto;
+  min-height: 620px;
+  padding-top: 38px;
+}
+
+.segnale-source,
+.segnale-reading,
+.segnale-decision {
+  position: relative;
+  z-index: 2;
+}
+
+.segnale-source {
+  grid-column: 1 / 6;
+  grid-row: 1;
+}
+
+.segnale-source h3 {
+  margin: 19px 0 35px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 48px;
+  font-weight: 610;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  white-space: nowrap;
+}
+
+.segnale-context {
+  color: var(--text-secondary);
+}
+
+.segnale-context p {
+  margin: 0;
+}
+
+.segnale-context-facts {
+  display: flex;
+  gap: 64px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.segnale-context-facts strong {
+  font-weight: 560;
+}
+
+.segnale-context-place {
+  margin-top: 18px !important;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.segnale-context-noise {
+  display: grid;
+  gap: 9px;
+  margin-top: 24px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.segnale-reading {
+  grid-column: 7 / 11;
+  grid-row: 1;
+  align-self: start;
+  margin-top: 86px;
+  left: -40px;
+}
+
+.segnale-reading-label-mobile {
+  display: none;
+}
+
+.segnale-evidence-list {
+  display: grid;
+  gap: 23px;
+  margin-top: 24px;
+}
+
+.segnale-evidence-list p {
+  display: grid;
+  grid-template-columns: 115px 1fr;
+  gap: 20px;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.segnale-evidence-list strong {
+  font-weight: 620;
+}
+
+.segnale-evidence-list span {
+  display: none;
+}
+
+.segnale-decision {
+  grid-column: 8 / 13;
+  grid-row: 2;
+  margin-top: 35px;
+  left: 6px;
+}
+
+.segnale-decision h3 {
+  margin: 19px 0 13px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 41px;
+  font-weight: 630;
+  line-height: 1.08;
+  letter-spacing: -0.024em;
+  text-wrap: balance;
+  white-space: nowrap;
+}
+
+.segnale-decision-detail {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.segnale-decision-rule {
+  display: block;
+  width: 450px;
+  height: 2px;
+  margin-top: 18px;
+  background: var(--accent-primary);
+}
+
+.segnale-secondary-actions {
+  display: grid;
+  gap: 12px;
+  margin: 37px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.segnale-trace {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 620px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.segnale-trace path {
+  fill: none;
+  stroke: var(--s01-line);
+  stroke-width: 1.15px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.segnale-trace [data-trace-first],
+.segnale-trace [data-trace-final] {
+  stroke-dasharray: 5 7;
+}
+
+.segnale-trace .segnale-trace-teal {
+  stroke: var(--accent-primary);
+  stroke-width: 1.8px;
+}
+
+.segnale-trace circle {
+  fill: var(--surface-canvas);
+  stroke: var(--s01-line);
+  stroke-width: 1.25px;
+}
+
+.segnale-trace .segnale-trace-marker {
+  fill: var(--surface-canvas);
+  stroke: var(--s01-line);
+  stroke-width: 1.25px;
+}
+
+.segnale-trace-mobile {
+  display: none;
+}
+
+@media (max-width: 1100px) and (min-width: 769px) {
+  .segnale-how-it-works-inner {
+    padding-inline: 56px;
+  }
+
+  .segnale-how-it-works-header h2 {
+    font-size: 46px;
+  }
+
+  .segnale-source h3 {
+    font-size: 43px;
+  }
+
+  .segnale-reading {
+    grid-column: 7 / 13;
+  }
+
+  .segnale-decision {
+    grid-column: 7 / 13;
+  }
+
+  .segnale-decision h3 {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 768px) {
+  .segnale-how-it-works {
+    height: 165svh;
+  }
+
+  .segnale-how-it-works-inner {
+    width: min(100%, 560px);
+    min-height: 790px;
+    padding: 20px 20px 10px;
+  }
+
+  .segnale-how-it-works-header {
+    padding-bottom: 17px;
+  }
+
+  .segnale-how-it-works-header h2 {
+    max-width: 420px;
+    margin: 12px 0 9px;
+    font-size: 28px;
+    line-height: 1.07;
+    letter-spacing: -0.024em;
+  }
+
+  .segnale-how-it-works-header h2 span {
+    display: block;
+  }
+
+  .segnale-s01-intro {
+    max-width: 410px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .segnale-story {
+    display: block;
+    min-height: 595px;
+    padding-top: 23px;
+  }
+
+  .segnale-source h3 {
+    max-width: 330px;
+    margin: 12px 0 18px;
+    font-size: 30px;
+    line-height: 1.08;
+    letter-spacing: -0.022em;
+    white-space: normal;
+  }
+
+  .segnale-source h3 span {
+    display: block;
+  }
+
+  .segnale-context-facts {
+    gap: 0;
+    font-size: 12px;
+  }
+
+  .segnale-context-facts strong + strong::before {
+    content: "·";
+    margin-inline: 5px;
+  }
+
+  .segnale-context-place {
+    margin-top: 10px !important;
+    font-size: 13px;
+  }
+
+  .segnale-context-noise {
+    gap: 7px;
+    margin-top: 12px;
+    font-size: 12px;
+  }
+
+  .segnale-reading {
+    width: calc(100% - 136px);
+    margin: 27px 0 0 136px;
+    left: 0;
+  }
+
+  .segnale-reading-label-desktop {
+    display: none;
+  }
+
+  .segnale-reading-label-mobile {
+    display: inline;
+  }
+
+  .segnale-evidence-list {
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .segnale-evidence-list p {
+    display: flex;
+    gap: 5px;
+    white-space: nowrap;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .segnale-evidence-list span {
+    display: inline;
+  }
+
+  .segnale-decision {
+    margin-top: 49px;
+    left: 0;
+  }
+
+  .segnale-decision h3 {
+    max-width: 330px;
+    margin: 12px 0 8px;
+    font-size: 28px;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    white-space: normal;
+  }
+
+  .segnale-decision-detail {
+    max-width: 345px;
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  .segnale-decision-rule {
+    width: calc(100% - 20px);
+    margin-top: 14px;
+  }
+
+  .segnale-secondary-actions {
+    gap: 6px;
+    margin-top: 14px;
+    font-size: 12px;
+  }
+
+  .segnale-trace {
+    top: 0;
+    width: min(350px, 100%);
+    height: 595px;
+    view-transition-name: none;
+  }
+
+  .segnale-trace-desktop {
+    display: none;
+  }
+
+  .segnale-trace-mobile {
+    display: block;
+  }
+
+  .segnale-trace-mobile path,
+  .segnale-trace-mobile circle {
+    vector-effect: non-scaling-stroke;
+  }
+}
+
+@media (max-width: 374px) {
+  .segnale-how-it-works-inner {
+    padding-inline: 20px;
+  }
+
+  .segnale-how-it-works-header h2 {
+    font-size: 27px;
+  }
+
+  .segnale-source h3 {
+    font-size: 29px;
+  }
+
+  .segnale-reading {
+    width: calc(100% - 126px);
+    margin-left: 126px;
+  }
+
+  .segnale-evidence-list p {
+    font-size: 11.5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segnale-how-it-works {
+    height: auto;
+  }
+
+  .segnale-how-it-works-sticky {
+    position: relative;
+    height: auto;
+    min-height: 790px;
+    overflow: hidden;
+  }
+
+  .segnale-trace [data-trace-center] {
+    opacity: 0.55;
+  }
+}

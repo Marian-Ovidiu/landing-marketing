@@ -1,0 +1,645 @@
+/* Sezione 03 — «Cosa ricevi: il fascicolo» (fase 05B.3).
+   Dossier fisico con separatori a linguetta + indice editoriale.
+   Solo DOM/CSS/SVG e texture approvate. Nessuna timeline scroll-linked:
+   il movimento nasce dall'interazione. */
+
+.dossier-section {
+  position: relative;
+  padding: 92px 0 88px;
+  overflow: clip;
+  /* cambio di ritmo dopo il tavolo del mazzo: fondo più chiaro e quieto */
+  background-color: var(--surface-canvas);
+  background-image: url("/assets/hero-surface-texture-v2-1024.webp");
+  background-size: 1024px 1024px;
+  color: var(--text-primary);
+}
+
+.dossier-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: rgba(var(--ink-rgb), 0.1);
+}
+
+/* ---------- testata: stesso impianto editoriale di S01/S02 ---------- */
+.dossier-header-layout,
+.dossier-footer-layout {
+  position: relative;
+  width: min(1180px, calc(100% - 112px));
+  margin-inline: auto;
+}
+
+.dossier-header { width: 690px; max-width: 100%; }
+
+.dossier-kicker {
+  margin-bottom: 13px;
+  color: var(--accent-terracotta-deep);
+  font-size: 12px;
+}
+
+.dossier-header h2 {
+  max-width: 680px;
+  font-family: var(--font-display), "Iowan Old Style", Georgia, serif;
+  font-size: clamp(38px, 4vw, 58px);
+  font-weight: 570;
+  font-variation-settings: "opsz" 96, "SOFT" 40;
+  letter-spacing: -0.018em;
+  line-height: 1.02;
+}
+
+.dossier-intro {
+  max-width: 620px;
+  margin-top: 16px;
+  color: var(--text-secondary);
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+@media (min-width: 1024px) {
+  .dossier-header-layout,
+  .dossier-footer-layout {
+    left: 50%;
+    width: 1440px;
+    padding-inline: var(--hero-padding-x-desktop);
+    margin-inline: 0;
+    transform: translateX(-50%);
+  }
+}
+
+/* ---------- assestamento d'ingresso (una volta, mai in reduced) ---------- */
+.dossier-stage[data-enter="pending"] {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.dossier-stage[data-enter="done"] {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 320ms ease-out, transform 320ms ease-out;
+}
+
+/* ---------- toni cartoncino ---------- */
+.tone-terracotta { --tab-tone: var(--accent-terracotta); }
+.tone-brass { --tab-tone: var(--accent-brass); }
+.tone-olive { --tab-tone: var(--accent-olive); }
+.tone-ink { --tab-tone: var(--surface-ink); }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ==================== DESKTOP: split 42/58 ==================== */
+.dossier-body--desktop {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  /* come il tavolo di S02: corpo nel contenitore centrato, testata sulla griglia 1440 */
+  .dossier-body--desktop {
+    display: grid;
+    grid-template-columns: minmax(0, 0.42fr) minmax(0, 0.58fr);
+    gap: 64px;
+    width: min(1180px, calc(100% - 112px));
+    margin: 54px auto 0;
+  }
+  .dossier-stack { display: none; }
+}
+
+/* ---------- indice editoriale ---------- */
+.dossier-index {
+  list-style: none;
+  display: grid;
+  gap: 4px;
+  align-content: start;
+}
+
+.dossier-index-button {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  width: 100%;
+  padding: 14px 10px 15px 6px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: border-color 160ms ease-out, transform 160ms ease-out;
+}
+
+.dossier-index-button.is-active {
+  border-left-color: var(--accent-terracotta);
+  transform: translateX(2px);
+}
+
+.dossier-index-button:focus-visible {
+  outline: 2px dashed var(--accent-terracotta);
+  outline-offset: 3px;
+}
+
+.index-numeral {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 24px;
+  font-weight: 560;
+  line-height: 1.1;
+  color: rgba(var(--ink-rgb), 0.38);
+  transition: color 160ms ease-out;
+}
+
+.dossier-index-button.is-active .index-numeral { color: var(--text-primary); }
+
+.index-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.index-title {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 19px;
+  font-weight: 550;
+  line-height: 1.15;
+  color: var(--text-secondary);
+  transition: color 160ms ease-out;
+}
+
+.dossier-index-button.is-active .index-title,
+.dossier-index-button:hover .index-title { color: var(--text-primary); }
+
+.index-leader {
+  flex: 1;
+  min-width: 24px;
+  border-bottom: 1px dotted rgba(var(--ink-rgb), 0.3);
+  transform: translateY(-4px);
+}
+
+.index-desc {
+  display: block;
+  margin-top: 5px;
+  max-width: 340px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* ---------- fascicolo ---------- */
+.dossier-folder {
+  position: relative;
+  padding-top: 36px; /* spazio per le linguette */
+}
+
+/* cartella posteriore in cartoncino, leggermente disallineata */
+.dossier-folder::before {
+  content: "";
+  position: absolute;
+  inset: 30px -10px -12px 8px;
+  background-color: var(--surface-canvas-deep);
+  background-image: url("/assets/hero-paper-grain-512.webp");
+  background-size: 420px 420px;
+  border: 1px solid rgba(var(--ink-rgb), 0.16);
+  border-radius: 2px;
+  transform: rotate(0.5deg);
+  box-shadow: var(--shadow-fragment-resting);
+}
+
+.dossier-tabs {
+  position: absolute;
+  top: 0;
+  left: 26px;
+  right: 40px;
+  display: flex;
+  gap: 7px;
+  align-items: flex-end;
+}
+
+.dossier-tab-slot { display: block; }
+/* larghezze e assetti leggermente diversi: separatori veri, non tab web */
+.dossier-tab-slot:nth-child(1) { flex: 1.05 1 0; transform: translateY(1px); }
+.dossier-tab-slot:nth-child(2) { flex: 1.2 1 0; }
+.dossier-tab-slot:nth-child(3) { flex: 0.95 1 0; transform: translateY(2px) rotate(-0.4deg); }
+.dossier-tab-slot:nth-child(4) { flex: 1.3 1 0; transform: translateY(1px); }
+.dossier-tab-slot:nth-child(5) { flex: 1.15 1 0; transform: rotate(0.35deg); }
+.dossier-tab-slot:nth-child(6) { flex: 1 1 0; transform: translateY(2px); }
+
+.dossier-tab {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  width: 100%;
+  height: 42px;
+  padding: 7px 12px 12px;
+  border: 1px solid rgba(var(--ink-rgb), 0.2);
+  border-bottom: 0;
+  background-color: var(--surface-paper);
+  background-image: url("/assets/hero-paper-grain-512.webp");
+  background-size: 420px 420px;
+  box-shadow: inset 0 3px 0 var(--tab-tone);
+  color: var(--text-primary);
+  font: inherit;
+  cursor: pointer;
+  clip-path: polygon(0 100%, 5% 8%, 12% 0, 90% 2%, 97% 12%, 100% 100%);
+  transition: transform 200ms ease-out;
+}
+
+.dossier-tab-slot:nth-child(even) .dossier-tab {
+  clip-path: polygon(0 100%, 3% 14%, 9% 2%, 93% 0, 98% 10%, 100% 100%);
+}
+
+.dossier-tab.is-active {
+  transform: translateY(-2px);
+  box-shadow: inset 0 3px 0 var(--tab-tone), inset 0 -6px 6px -6px rgba(var(--ink-rgb), 0.12);
+}
+
+.dossier-tab:focus-visible {
+  outline: 2px dashed var(--accent-terracotta);
+  outline-offset: 2px;
+}
+
+.tab-numeral {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 13px;
+  font-weight: 580;
+}
+
+.tab-short {
+  font-family: var(--font-mono), monospace;
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  color: var(--text-secondary);
+}
+
+/* pagina attiva: sopra il bordo inferiore delle linguette (appartenenza fisica) */
+.dossier-page {
+  position: relative;
+  z-index: 2;
+  min-height: 480px;
+  padding: 28px 32px 30px;
+  background-color: var(--surface-paper);
+  background-image: url("/assets/hero-paper-grain-512.webp");
+  background-size: 420px 420px;
+  border: 1px solid rgba(var(--ink-rgb), 0.18);
+  box-shadow: var(--shadow-fragment-resting);
+  clip-path: polygon(0.3% 0.4%, 99.7% 0, 100% 52%, 99.6% 99.7%, 42% 100%, 0.2% 99.5%, 0 46%);
+}
+
+.dossier-tab.is-active { position: relative; z-index: 3; }
+
+/* ---------- contenuto pagina (condiviso desktop/mobile) ---------- */
+.dossier-page-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  animation: dossier-page-in 240ms ease-out;
+}
+
+.dossier-page { display: flex; flex-direction: column; }
+
+@keyframes dossier-page-in {
+  from { opacity: 0; transform: translateY(11px); }
+}
+
+.dossier-page-exit {
+  position: absolute;
+  inset: 28px 32px 30px;
+  pointer-events: none;
+  animation: dossier-page-out 220ms ease-out forwards;
+}
+
+@keyframes dossier-page-out {
+  to { opacity: 0; transform: translateY(-10px); }
+}
+
+.page-head {
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.2);
+  font-family: var(--font-mono), monospace;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.dossier-page-content > :nth-child(2) { margin-bottom: 26px; }
+
+.page-foot {
+  margin-top: auto; /* colophon ancorato al fondo della pagina del dossier */
+  padding-top: 9px;
+  padding-top: 9px;
+  border-top: 1px dotted rgba(var(--ink-rgb), 0.24);
+  font-family: var(--font-mono), monospace;
+  font-size: 7.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.page-priorities,
+.page-calendar,
+.page-ideas,
+.page-promos,
+.page-metrics {
+  list-style: none;
+  margin-top: 18px;
+  display: grid;
+}
+
+.page-priorities li,
+.page-calendar li,
+.page-metrics li {
+  display: grid;
+  align-items: baseline;
+  padding: 13px 2px;
+  border-bottom: 1px dotted rgba(var(--ink-rgb), 0.2);
+}
+
+.page-priorities li { grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; }
+.page-priorities strong {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 21px;
+  font-weight: 620;
+}
+.page-priorities span {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 17px;
+  font-weight: 545;
+}
+.page-priorities em,
+.page-calendar em,
+.page-metrics em {
+  font-family: var(--font-mono), monospace;
+  font-style: normal;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+}
+
+.page-calendar li { grid-template-columns: 52px minmax(0, 1fr) auto; gap: 10px; }
+.page-calendar strong {
+  font-family: var(--font-mono), monospace;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--accent-brass);
+}
+.page-calendar span {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 16px;
+  font-weight: 545;
+}
+
+.page-ideas { gap: 16px; margin-top: 20px; }
+.page-ideas li { display: grid; gap: 5px; padding-bottom: 14px; border-bottom: 1px dotted rgba(var(--ink-rgb), 0.2); }
+.page-idea-title {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 17px;
+  font-weight: 550;
+  line-height: 1.25;
+}
+.page-idea-note {
+  font-family: var(--font-hand), cursive;
+  font-size: 14px;
+  color: var(--accent-terracotta-deep);
+}
+
+.page-google { margin-top: 18px; }
+.page-draft-label {
+  font-family: var(--font-mono), monospace;
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.page-draft {
+  margin: 8px 0 18px;
+  padding: 10px 14px;
+  border-left: 2px solid var(--accent-terracotta);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 16px;
+  font-style: italic;
+  line-height: 1.35;
+}
+.page-checklist { list-style: none; display: grid; }
+.page-checklist li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 9px 2px;
+  border-bottom: 1px dotted rgba(var(--ink-rgb), 0.2);
+}
+.page-checklist strong {
+  font-family: var(--font-mono), monospace;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.page-checklist em {
+  font-family: var(--font-mono), monospace;
+  font-style: normal;
+  font-size: 9px;
+  color: var(--accent-olive);
+}
+.page-checklist li:last-child em { color: var(--accent-terracotta-deep); }
+
+.page-promos { gap: 14px; margin-top: 20px; }
+.page-promos li { display: grid; gap: 6px; padding-bottom: 13px; border-bottom: 1px dotted rgba(var(--ink-rgb), 0.2); }
+.page-promo-name {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 17px;
+  font-weight: 550;
+}
+.page-promo-meta { display: flex; gap: 14px; align-items: baseline; }
+.page-promo-meta strong {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+.page-promo-meta em {
+  font-family: var(--font-mono), monospace;
+  font-style: normal;
+  font-size: 9px;
+  color: var(--text-secondary);
+}
+
+.page-metrics li { grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px; }
+.page-metrics span {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 15.5px;
+  font-weight: 545;
+}
+.page-metrics strong {
+  font-family: var(--font-mono), monospace;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--accent-terracotta-deep);
+}
+
+/* ---------- chiusa ---------- */
+.dossier-closing {
+  margin-top: 46px;
+  max-width: 560px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 20px;
+  font-weight: 540;
+  line-height: 1.3;
+}
+
+/* ==================== MOBILE / TABLET: pila di fascette ==================== */
+.dossier-stack {
+  list-style: none;
+  width: min(650px, calc(100% - 32px));
+  margin: 40px auto 0;
+  display: grid;
+  gap: 9px;
+}
+
+.fascetta-heading { margin: 0; }
+
+.fascetta {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px 14px 13px 12px;
+  border: 1px solid rgba(var(--ink-rgb), 0.2);
+  background-color: var(--surface-paper);
+  background-image: url("/assets/hero-paper-grain-512.webp");
+  background-size: 420px 420px;
+  box-shadow: inset 4px 0 0 var(--tab-tone), var(--shadow-fragment-resting);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  clip-path: polygon(0 4%, 99.6% 0, 100% 96%, 0.4% 100%);
+}
+
+.fascetta-item:nth-child(even) .fascetta {
+  clip-path: polygon(0.4% 0, 100% 3%, 99.6% 100%, 0 97%);
+}
+
+.fascetta:focus-visible {
+  outline: 2px dashed var(--accent-terracotta);
+  outline-offset: 2px;
+}
+
+.fascetta-numeral {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 19px;
+  font-weight: 580;
+  color: rgba(var(--ink-rgb), 0.42);
+}
+
+.fascetta-item.is-open .fascetta-numeral { color: var(--text-primary); }
+
+.fascetta-title {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 16.5px;
+  font-weight: 550;
+}
+
+.fascetta-mark {
+  font-family: var(--font-mono), monospace;
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+/* apertura: grid-rows 0fr→1fr, stabile e senza layout shift fragile */
+.fascetta-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 260ms ease-out;
+}
+
+.fascetta-item.is-open .fascetta-panel { grid-template-rows: 1fr; }
+
+.fascetta-panel-inner { min-height: 0; overflow: hidden; }
+
+.fascetta-page {
+  margin: 0 6px;
+  padding: 18px 16px 18px;
+  background-color: var(--surface-paper);
+  background-image: url("/assets/hero-paper-grain-512.webp");
+  background-size: 420px 420px;
+  border: 1px solid rgba(var(--ink-rgb), 0.16);
+  border-top: 0;
+  box-shadow: var(--shadow-fragment-resting);
+}
+
+.fascetta-page .dossier-page-content { animation: none; height: auto; }
+.fascetta-page .page-foot { margin-top: 18px; padding-top: 9px; }
+
+@media (max-width: 1023px) {
+  .dossier-section { padding: 72px 0 68px; }
+  .dossier-header-layout,
+  .dossier-footer-layout { width: min(650px, calc(100% - 32px)); }
+  .dossier-header { width: 100%; }
+  .dossier-closing { margin-top: 36px; font-size: 17px; }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* stessa formula della testata S02: assi coincidenti anche su tablet */
+  .dossier-header-layout,
+  .dossier-footer-layout { width: calc(100% - 112px); }
+  .dossier-header h2 { font-size: 46px; }
+}
+
+@media (max-width: 767px) {
+  .dossier-header h2 { font-size: clamp(28px, 8.3vw, 34px); }
+  .dossier-intro { font-size: 14px; margin-top: 10px; }
+  .dossier-kicker { font-size: 10px; margin-bottom: 8px; }
+  .page-priorities span,
+  .page-calendar span,
+  .page-idea-title,
+  .page-promo-name,
+  .page-metrics span { font-size: 14.5px; }
+  .page-metrics li { grid-template-columns: minmax(0, 1fr) auto; }
+  .page-metrics em { grid-column: 2; }
+  .page-head,
+  .page-foot,
+  .page-draft-label { font-size: 10px; }
+  .page-priorities em,
+  .page-calendar em,
+  .page-calendar strong,
+  .page-checklist strong,
+  .page-checklist em,
+  .page-promo-meta strong,
+  .page-promo-meta em,
+  .page-metrics strong,
+  .page-metrics em { font-size: 11px; }
+  .page-idea-note { font-size: 12px; }
+}
+
+/* la regola base .dossier-stack (display: grid) sta sopra: qui, in coda,
+   la visibilità per breakpoint vince sull'ordine del foglio */
+@media (min-width: 1024px) {
+  .dossier-stack { display: none; }
+}
+@media (max-width: 1023px) {
+  .dossier-body--desktop { display: none; }
+}
+
+/* ==================== reduced motion ==================== */
+@media (prefers-reduced-motion: reduce) {
+  .dossier-stage[data-enter] { opacity: 1; transform: none; transition: none; }
+  .dossier-page-content { animation: none; }
+  .dossier-page-exit { display: none; }
+  .dossier-tab,
+  .dossier-index-button { transition: none; }
+  .fascetta-panel { transition: none; }
+}

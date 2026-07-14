@@ -1,0 +1,465 @@
+/* S02 Segnale — «Operational Rhythm». Scoped al rendering dedicato.
+   Art direction: outputs/segnale-s02-art-direction.md (variante A).
+   La banda è una misura editoriale, non un grafico: hairline, sette
+   intervalli, tre accenti ink corti, tre marker. Il teal vive soltanto sui
+   marker, e soltanto dopo l'allineamento azione→momento.
+   Default CSS = stato finale (leggibile senza JavaScript); lo stato
+   «settimana aperta» è impostato da GSAP solo con motion consentita. */
+
+.segnale-weekly-rhythm {
+  --s02-line: #cfd6d9;
+  height: 200svh;
+  background: var(--surface-canvas);
+  color: var(--text-primary);
+}
+
+.segnale-weekly-rhythm-sticky {
+  position: sticky;
+  top: 0;
+  min-height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background: var(--surface-canvas);
+}
+
+.segnale-weekly-rhythm-inner {
+  position: relative;
+  width: min(100%, 1440px);
+  min-height: min(900px, 100svh);
+  margin-inline: auto;
+  padding: 38px 96px 30px;
+}
+
+/* ---------- testata (compatta: non una seconda hero) ---------- */
+
+.segnale-s02-header {
+  position: relative;
+  padding-bottom: 21px;
+  border-bottom: 1px solid var(--s02-line);
+}
+
+.segnale-s02-kicker,
+.segnale-s02-label,
+.segnale-s02-disclaimer {
+  margin: 0;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.125em;
+  color: var(--text-secondary);
+}
+
+.segnale-s02-header h2 {
+  margin: 12px 0 8px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 44px;
+  font-weight: 620;
+  line-height: 1.04;
+  letter-spacing: -0.028em;
+}
+
+.segnale-s02-intro {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.segnale-s02-disclaimer {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: #8a959b;
+}
+
+/* ---------- campo del ritmo (coordinate dai mockup B1) ---------- */
+
+.segnale-s02-field {
+  position: relative;
+  height: 590px;
+}
+
+.segnale-s02-mass {
+  position: absolute;
+  margin: 0;
+}
+
+.segnale-s02-mass h3 {
+  margin: 14px 0 10px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 24px;
+  font-weight: 620;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.segnale-s02-result {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.segnale-s02-meta {
+  margin: 10px 0 0;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.segnale-s02-mass--lun {
+  top: 118px;
+  left: 0;
+  max-width: 480px;
+}
+
+.segnale-s02-mass--mar {
+  top: 314px;
+  left: 14.9%;
+  max-width: 620px;
+}
+
+.segnale-s02-mass--dom {
+  top: 322px;
+  right: 0;
+  max-width: 440px;
+  text-align: right;
+}
+
+.segnale-s02-mass h3 span {
+  display: inline;
+}
+
+/* riga di metadati quieti: una sola riga ritmica sopra la banda */
+.segnale-s02-quiet-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.segnale-s02-quiet-list li {
+  position: absolute;
+  top: 214px; /* baseline allineata alla riga meta di LUN nello stato finale */
+  margin: 0;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  opacity: 0.58; /* stato finale: presenti, quieti */
+}
+
+.segnale-s02-quiet-list li:nth-child(1) { left: calc(28.5714% + 8px); }
+.segnale-s02-quiet-list li:nth-child(2) { left: calc(42.8571% + 8px); }
+.segnale-s02-quiet-list li:nth-child(3) { left: calc(57.1429% + 8px); }
+.segnale-s02-quiet-list li:nth-child(4) { left: calc(71.4286% + 8px); }
+
+.segnale-s02-quiet-narrow,
+.segnale-s02-quiet-mobile {
+  display: none;
+}
+
+.segnale-s02-meta-mobile {
+  display: none;
+}
+
+/* etichette dei giorni: riga mono uniforme sopra la banda (decorativa:
+   il giorno reale vive nelle masse e nelle righe quiete) */
+.segnale-s02-days {
+  margin: 0;
+}
+
+.segnale-s02-day {
+  position: absolute;
+  top: 237px;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.125em;
+  color: var(--text-secondary);
+}
+
+.segnale-s02-day--0 { left: 0; color: var(--text-primary); }
+.segnale-s02-day--1 { left: calc(14.2857% + 8px); color: var(--text-primary); }
+.segnale-s02-day--2 { left: calc(28.5714% + 8px); opacity: 0.58; }
+.segnale-s02-day--3 { left: calc(42.8571% + 8px); opacity: 0.58; }
+.segnale-s02-day--4 { left: calc(57.1429% + 8px); opacity: 0.58; }
+.segnale-s02-day--5 { left: calc(71.4286% + 8px); opacity: 0.58; }
+.segnale-s02-day--6 { left: calc(85.7143% + 22px); top: 255px; color: var(--text-primary); }
+
+/* ---------- banda (un solo SVG: hairline, tick, accenti, marker) ---------- */
+
+.segnale-s02-band {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 590px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.segnale-s02-band path {
+  fill: none;
+  stroke: var(--s02-line);
+  stroke-width: 1.15px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.segnale-s02-band .segnale-s02-accent {
+  stroke: var(--text-primary);
+  stroke-width: 2px;
+  opacity: 0.9;
+}
+
+.segnale-s02-band circle,
+.segnale-s02-band ellipse {
+  fill: var(--surface-canvas);
+  stroke: var(--accent-primary); /* finale; il grigio iniziale lo imposta GSAP */
+  stroke-width: 1.25px;
+  vector-effect: non-scaling-stroke;
+}
+
+.segnale-s02-band-mobile {
+  display: none;
+}
+
+/* ---------- chiusa ---------- */
+
+.segnale-s02-closing {
+  margin-top: 6px;
+}
+
+.segnale-s02-total {
+  margin: 0;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 28px;
+  font-weight: 630;
+  line-height: 1.15;
+  letter-spacing: -0.022em;
+}
+
+.segnale-s02-total-detail {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+/* ---------- tablet (769–1100) ---------- */
+
+@media (max-width: 1100px) and (min-width: 769px) {
+  .segnale-weekly-rhythm-inner {
+    padding-inline: 56px;
+  }
+
+  .segnale-s02-header h2 {
+    font-size: 40px;
+  }
+
+  .segnale-s02-mass h3 {
+    font-size: 22px;
+  }
+
+  /* MAR scende di uno step e DOM va su due righe: le due masse non si
+     toccano nemmeno nel campo compresso (spec B1 §11) */
+  .segnale-s02-mass--mar {
+    top: 338px;
+  }
+
+  .segnale-s02-mass--dom {
+    top: 334px;
+  }
+
+  .segnale-s02-mass--dom h3 span {
+    display: block;
+  }
+
+  /* nelle battute strette resta giorno (riga etichette) + minuti */
+  .segnale-s02-quiet-wide {
+    display: none;
+  }
+
+  .segnale-s02-quiet-narrow {
+    display: inline;
+  }
+}
+
+/* ---------- mobile (≤768): tre nuclei, righe quiete tra i nuclei ---------- */
+
+@media (max-width: 768px) {
+  .segnale-weekly-rhythm {
+    height: 180svh;
+  }
+
+  .segnale-weekly-rhythm-inner {
+    width: min(100%, 560px);
+    min-height: 800px;
+    padding: 20px 20px 10px;
+  }
+
+  .segnale-s02-header {
+    padding-bottom: 17px;
+  }
+
+  .segnale-s02-header h2 {
+    max-width: 420px;
+    margin: 12px 0 9px;
+    font-size: 24px;
+    line-height: 1.1;
+    letter-spacing: -0.024em;
+  }
+
+  .segnale-s02-intro {
+    max-width: 410px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .segnale-s02-kicker {
+    font-size: 9px;
+  }
+
+  .segnale-s02-disclaimer {
+    position: static;
+    margin-top: 8px;
+    font-size: 8.5px;
+  }
+
+  .segnale-s02-field {
+    height: 548px;
+    margin-top: 23px;
+  }
+
+  .segnale-s02-mass {
+    left: 0;
+    right: 0;
+    max-width: none;
+  }
+
+  .segnale-s02-mass--lun { top: 0; }
+  .segnale-s02-mass--mar { top: 169px; }
+
+  .segnale-s02-mass--dom {
+    top: 408px;
+    text-align: left;
+  }
+
+  /* il frammento di banda vive nel varco fra etichetta e titolo */
+  .segnale-s02-label {
+    margin-bottom: 26px;
+  }
+
+  .segnale-s02-mass h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+    line-height: 1.22;
+  }
+
+  .segnale-s02-mass h3 span {
+    display: block;
+  }
+
+  .segnale-s02-mass--lun h3 span {
+    display: inline;
+  }
+
+  .segnale-s02-result {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .segnale-s02-meta {
+    margin-top: 8px;
+  }
+
+  .segnale-s02-meta-wide {
+    display: none;
+  }
+
+  .segnale-s02-meta-mobile {
+    display: inline;
+  }
+
+  /* righe quiete: MER fra i primi due nuclei, GIO/VEN/SAB prima di DOM */
+  .segnale-s02-quiet-list li {
+    top: auto;
+    left: 0 !important;
+    opacity: 0.58;
+  }
+
+  .segnale-s02-quiet-list li:nth-child(1) { top: 129px; }
+  .segnale-s02-quiet-list li:nth-child(2) { top: 320px; }
+  .segnale-s02-quiet-list li:nth-child(3) { top: 344px; }
+  .segnale-s02-quiet-list li:nth-child(4) { top: 368px; }
+
+  .segnale-s02-quiet-wide,
+  .segnale-s02-quiet-narrow {
+    display: none;
+  }
+
+  .segnale-s02-quiet-mobile {
+    display: inline;
+  }
+
+  .segnale-s02-days {
+    display: none;
+  }
+
+  .segnale-s02-band {
+    width: min(350px, 100%);
+    height: 548px;
+  }
+
+  .segnale-s02-band-desktop {
+    display: none;
+  }
+
+  .segnale-s02-band-mobile {
+    display: block;
+  }
+
+  .segnale-s02-closing {
+    margin-top: 28px;
+  }
+
+  .segnale-s02-total {
+    font-size: 17px;
+    letter-spacing: -0.015em;
+  }
+
+  .segnale-s02-total-detail {
+    margin-top: 6px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 374px) {
+  .segnale-s02-header h2 {
+    font-size: 23px;
+  }
+}
+
+/* ---------- reduced motion: sezione in flusso, stato finale ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .segnale-weekly-rhythm {
+    height: auto;
+  }
+
+  .segnale-weekly-rhythm-sticky {
+    position: relative;
+    height: auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+}
