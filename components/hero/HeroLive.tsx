@@ -507,7 +507,8 @@ export function HeroLive({
             const panelDy0 = () => {
               const stageBottom = field.offsetTop + field.offsetHeight;
               const panelBottom = panel.offsetTop + panel.offsetHeight;
-              return Math.max(0, stageBottom - 8 - panelBottom);
+              const bottomClearance = theme === "segnale" && isMobile ? 24 : 8;
+              return Math.max(0, stageBottom - bottomClearance - panelBottom);
             };
             tl.fromTo(
               panel,

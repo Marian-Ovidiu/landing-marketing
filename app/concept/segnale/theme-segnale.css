@@ -449,37 +449,89 @@
 /* ---------- mobile (390 / 360): stessa struttura approvata ---------- */
 @media (max-width: 767px) {
   [data-theme="segnale"] .stage--live .headline {
-    letter-spacing: -0.02em;
+    font-size: clamp(26px, 7vw, 28px);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
   }
-  [data-theme="segnale"] .stage--live .glass-panel-inner {
-    padding: 20px 18px;
-  }
-  [data-theme="segnale"] .stage--live .plan-caption {
-    font-size: 10px;
-    margin-bottom: 12px;
-  }
-  [data-theme="segnale"] .stage--live .plan-card {
-    padding: 12px 15px 14px;
-  }
-  [data-theme="segnale"] .stage--live .plan-card-number {
-    font-size: 22px;
-  }
-  [data-theme="segnale"] .stage--live .plan-card-title {
-    font-size: 15px;
+  [data-theme="segnale"] .stage--live .lead {
+    max-width: 380px;
+    padding-top: 8px;
+    margin-bottom: 18px;
+    font-size: 12.5px;
+    line-height: 1.4;
   }
 
-  /* focale: abbastanza largo da tenere l'etichetta su una riga */
+  /* Il piano resta centrale ma non riempie più quasi tutto lo stage. */
+  [data-theme="segnale"] .stage--live .glass-panel--live {
+    height: clamp(292px, 36.5svh, 310px);
+    max-height: calc(100% - 48px);
+    margin-inline: 16px;
+  }
+  [data-theme="segnale"] .stage--live .glass-panel-inner {
+    padding: 14px;
+  }
+  [data-theme="segnale"] .stage--live .plan-caption {
+    font-size: 9.5px;
+    margin-bottom: 8px;
+  }
+  [data-theme="segnale"] .stage--live .plan-list {
+    gap: 8px;
+  }
+  [data-theme="segnale"] .stage--live .plan-card {
+    gap: 10px;
+    padding: 9px 12px 10px;
+  }
+  [data-theme="segnale"] .stage--live .plan-card--priority {
+    padding-block: 10px 11px;
+  }
+  [data-theme="segnale"] .stage--live .plan-card-number {
+    font-size: 19px;
+  }
+  [data-theme="segnale"] .stage--live .plan-card--priority .plan-card-number {
+    font-size: 21px;
+  }
+  [data-theme="segnale"] .stage--live .plan-card-title {
+    font-size: 14px;
+    line-height: 1.25;
+  }
+  [data-theme="segnale"] .stage--live .plan-card--priority .plan-card-title {
+    font-size: 14.5px;
+  }
+  [data-theme="segnale"] .stage--live .plan-card-detail {
+    margin-top: 3px;
+    font-size: 11px;
+    line-height: 1.34;
+  }
+
+  /* Stessi quattro frammenti, ma con più gerarchia e meno sovrapposizione. */
   [data-theme="segnale"] .stage--live .slot--receipt {
-    width: 132px;
+    left: 20px;
+    top: 3%;
+    width: 128px;
+  }
+  [data-theme="segnale"] .stage--live .slot--review {
+    right: 20px;
+    top: 18%;
+    width: 136px;
+  }
+  [data-theme="segnale"] .stage--live .slot--flyer {
+    left: 70px;
+    top: 50%;
+    width: 94px;
+  }
+  [data-theme="segnale"] .stage--live .slot--polaroid {
+    right: 22px;
+    bottom: 1%;
+    width: 112px;
   }
   [data-theme="segnale"] .slot--receipt .sig-panel {
-    padding: 12px 13px 13px;
-    gap: 8px;
+    padding: 10px 11px 11px;
+    gap: 7px;
   }
 
   [data-theme="segnale"] .sig-panel {
-    padding: 10px 11px 12px;
-    gap: 6px;
+    padding: 8px 9px 10px;
+    gap: 5px;
     border-radius: 8px;
   }
   [data-theme="segnale"] .sig-data-row {
@@ -512,6 +564,25 @@
   /* nello slot stretto il tracking pieno spinge la nota su tre righe */
   [data-theme="segnale"] .sig-hours-note {
     letter-spacing: 0.06em;
+  }
+
+  /* La CTA conserva target e handoff, ma guadagna peso soltanto quando
+     --cta-sh passa da 0 a 1 nel montaggio finale già approvato. */
+  [data-theme="segnale"] .stage--live .cta-row {
+    gap: 12px;
+    padding: 16px var(--hero-padding-x-mobile)
+      calc(16px + env(safe-area-inset-bottom));
+  }
+  [data-theme="segnale"] .stage--live .cta-primary {
+    width: calc(100% - 16px);
+    min-height: 44px;
+    padding: 12px 20px;
+    background: rgba(var(--ink-rgb), calc(0.82 + 0.18 * var(--cta-sh, 0)));
+    font-size: 16px;
+    box-shadow:
+      0 1px 2px rgba(var(--ink-rgb), calc(0.06 + 0.08 * var(--cta-sh, 0))),
+      0 calc(6px * var(--cta-sh, 0)) calc(18px * var(--cta-sh, 0))
+        rgba(var(--ink-rgb), calc(0.16 * var(--cta-sh, 0)));
   }
 }
 
