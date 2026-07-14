@@ -156,6 +156,7 @@ test("non produce overflow ai breakpoint richiesti", async ({ browser, baseURL }
     { width: 1440, height: 1000 },
     { width: 1024, height: 900 },
     { width: 768, height: 900 },
+    { width: 412, height: 915 },
     { width: 390, height: 844 },
     { width: 375, height: 812 },
     { width: 360, height: 800 },
@@ -178,6 +179,118 @@ test("non produce overflow ai breakpoint richiesti", async ({ browser, baseURL }
     expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
     await context.close();
   }
+});
+
+test("S02 mobile ha tre scene editoriali leggibili nel visual viewport", async ({ browser, baseURL }) => {
+  const viewports = [
+    { width: 360, height: 800 },
+    { width: 375, height: 812 },
+    { width: 390, height: 844 },
+    { width: 412, height: 915 },
+  ];
+
+  for (const viewport of viewports) {
+    const context = await browser.newContext({ viewport });
+    const localPage = await context.newPage();
+    await localPage.goto(`${baseURL}/concept/segnale`, { waitUntil: "networkidle" });
+    const section = localPage.locator("#section-02-esempio-di-piano");
+    const sectionMetrics = await section.evaluate((node) => ({
+      top: node.getBoundingClientRect().top + window.scrollY,
+      range: node.getBoundingClientRect().height - window.innerHeight,
+    }));
+    await localPage.evaluate((y) => window.scrollTo(0, y), sectionMetrics.top + sectionMetrics.range);
+    await localPage.waitForTimeout(450);
+
+    const rhythm = await section.evaluate((node) => {
+      const one = (selector: string) => node.querySelector<HTMLElement>(selector)!;
+      const all = (selector: string) => Array.from(node.querySelectorAll<HTMLElement>(selector));
+      const rect = (element: Element) => element.getBoundingClientRect();
+      const visibleTextSizes = all("*")
+        .filter((element) => {
+          const box = rect(element);
+          const style = getComputedStyle(element);
+          return Boolean(element.textContent?.trim()) && box.width > 0 && box.height > 0 && style.visibility !== "hidden";
+        })
+        .map((element) => parseFloat(getComputedStyle(element).fontSize));
+      const scenes = all(".segnale-s02-mass");
+      const quiet = all(".segnale-s02-quiet-list li");
+      const titles = all(".segnale-s02-mass h3");
+      const descriptions = all(".segnale-s02-result");
+      const metadata = all(".segnale-s02-meta");
+      const inner = one(".segnale-weekly-rhythm-inner");
+      const sticky = one(".segnale-weekly-rhythm-sticky");
+      const process = one(".segnale-s02-disclaimer");
+      const closing = one(".segnale-s02-closing");
+      const quietCopy = one(".segnale-s02-quiet-mobile");
+      const mainMetaOpacity = parseFloat(getComputedStyle(metadata[0]).opacity);
+      const quietOpacity = parseFloat(getComputedStyle(quiet[0]).opacity) * parseFloat(getComputedStyle(quietCopy).opacity);
+
+      return {
+        minVisibleFont: Math.min(...visibleTextSizes),
+        visualViewport: {
+          width: window.visualViewport?.width ?? window.innerWidth,
+          height: window.visualViewport?.height ?? window.innerHeight,
+        },
+        innerHeight: rect(inner).height,
+        stickyHeight: rect(sticky).height,
+        closingBottom: rect(closing).bottom,
+        stickyBottom: rect(sticky).bottom,
+        processToFirst: rect(scenes[0]).top - rect(process).bottom,
+        titleToDescription: titles.map((title, index) => rect(descriptions[index]).top - rect(title).bottom),
+        descriptionToMeta: descriptions.map((description, index) => rect(metadata[index]).top - rect(description).bottom),
+        ordered: [
+          rect(scenes[0]).bottom < rect(quiet[0]).top,
+          rect(quiet[0]).bottom < rect(scenes[1]).top,
+          rect(scenes[1]).bottom < rect(quiet[1]).top,
+          rect(quiet[1]).bottom < rect(quiet[2]).top,
+          rect(quiet[2]).bottom < rect(quiet[3]).top,
+          rect(quiet[3]).bottom < rect(scenes[2]).top,
+          rect(scenes[2]).bottom < rect(closing).top,
+        ],
+        mainMetaOpacity,
+        quietOpacity,
+        quietTextTransform: getComputedStyle(quietCopy).textTransform,
+      };
+    });
+
+    expect(rhythm.minVisibleFont).toBeGreaterThanOrEqual(11);
+    expect(rhythm.visualViewport.width).toBe(viewport.width);
+    expect(rhythm.visualViewport.height).toBe(viewport.height);
+    expect(rhythm.innerHeight).toBeLessThanOrEqual(rhythm.visualViewport.height);
+    expect(rhythm.stickyHeight).toBeLessThanOrEqual(rhythm.visualViewport.height);
+    expect(rhythm.closingBottom).toBeLessThanOrEqual(rhythm.stickyBottom);
+    expect(rhythm.processToFirst).toBeGreaterThanOrEqual(32);
+    expect(rhythm.titleToDescription.every((gap) => gap >= 9.5)).toBe(true);
+    expect(rhythm.descriptionToMeta.every((gap) => gap >= 9.5)).toBe(true);
+    expect(rhythm.ordered.every(Boolean)).toBe(true);
+    expect(rhythm.mainMetaOpacity).toBeGreaterThan(rhythm.quietOpacity);
+    expect(rhythm.quietTextTransform).toBe("lowercase");
+    await context.close();
+  }
+});
+
+test("Sprint 5 non modifica la composizione a 768px", async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ viewport: { width: 768, height: 900 } });
+  const localPage = await context.newPage();
+  await localPage.goto(`${baseURL}/concept/segnale`, { waitUntil: "networkidle" });
+  const styles = await localPage.locator("#section-02-esempio-di-piano").evaluate((section) => {
+    const style = (selector: string) => getComputedStyle(section.querySelector(selector)!);
+    return {
+      heading: style(".segnale-s02-header h2").fontSize,
+      kicker: style(".segnale-s02-kicker").fontSize,
+      meta: style(".segnale-s02-meta").fontSize,
+      fieldMargin: style(".segnale-s02-field").marginTop,
+      innerPadding: style(".segnale-weekly-rhythm-inner").padding,
+    };
+  });
+  expect(styles).toEqual({
+    heading: "24px",
+    kicker: "9px",
+    meta: "10px",
+    fieldMargin: "23px",
+    innerPadding: "20px 20px 10px",
+  });
+  await context.close();
 });
 
 test("reduced motion mostra il piano completo in flusso normale", async ({ browser, baseURL }) => {

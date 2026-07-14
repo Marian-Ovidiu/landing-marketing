@@ -449,6 +449,122 @@
   }
 }
 
+/* ---------- Sprint 5: ritmo editoriale mobile (<768) ----------
+
+   La composizione resta quella approvata (un'unica banda e tre nuclei),
+   ma la gerarchia non dipende piu' dal microtesto. La testata recupera
+   altezza; il campo la redistribuisce fra scene e righe secondarie. */
+
+@media (max-width: 767px) {
+  .segnale-weekly-rhythm-inner {
+    min-height: min(800px, 100svh);
+    padding: 8px 16px 2px;
+  }
+
+  .segnale-s02-header {
+    padding-bottom: 6px;
+  }
+
+  .segnale-s02-kicker {
+    font-size: 11px;
+    line-height: 1.2;
+    letter-spacing: 0.1em;
+  }
+
+  .segnale-s02-header h2 {
+    max-width: 360px;
+    margin: 5px 0;
+    font-size: 21px;
+    line-height: 1.04;
+    letter-spacing: -0.026em;
+  }
+
+  .segnale-s02-intro {
+    max-width: 360px;
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .segnale-s02-disclaimer {
+    max-width: 350px;
+    margin-top: 5px;
+    font-size: 11px;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    color: var(--text-secondary);
+    opacity: 0.62;
+    text-wrap: balance;
+  }
+
+  .segnale-s02-field {
+    margin-top: 26px;
+  }
+
+  .segnale-s02-label {
+    margin-bottom: 20px;
+    font-size: 11px;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+  }
+
+  .segnale-s02-mass h3 {
+    margin-bottom: 10px;
+    font-size: 17.5px;
+    line-height: 1.15;
+  }
+
+  .segnale-s02-result {
+    max-width: 350px;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .segnale-s02-meta {
+    margin-top: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: 0.04em;
+    opacity: 0.78;
+  }
+
+  .segnale-s02-mass--mar {
+    top: 171px;
+  }
+
+  .segnale-s02-quiet-list li {
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.3;
+    letter-spacing: 0;
+  }
+
+  .segnale-s02-quiet-list li:nth-child(1) { top: 134px; }
+  .segnale-s02-quiet-list li:nth-child(2) { top: 320px; }
+  .segnale-s02-quiet-list li:nth-child(3) { top: 341px; }
+  .segnale-s02-quiet-list li:nth-child(4) { top: 362px; }
+
+  .segnale-s02-quiet-mobile {
+    opacity: 0.72;
+    text-transform: lowercase;
+  }
+
+  .segnale-s02-closing {
+    margin-top: 10px;
+  }
+
+  .segnale-s02-total {
+    font-size: 16px;
+    line-height: 1.1;
+  }
+
+  .segnale-s02-total-detail {
+    margin-top: 5px;
+    font-size: 11.5px;
+    line-height: 1.4;
+  }
+}
+
 /* ---------- reduced motion: sezione in flusso, stato finale ---------- */
 
 @media (prefers-reduced-motion: reduce) {
