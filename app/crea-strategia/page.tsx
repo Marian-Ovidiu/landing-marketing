@@ -13,7 +13,7 @@ export default function CreateStrategyPage() {
         <p className="create-strategy-kicker">Destinazione provvisoria</p>
         <h1 id="create-strategy-title">Raccontaci il tuo locale</h1>
         <p>Il flusso guidato verrà collegato qui.</p>
-        <Link href="/concept/page">Torna alla landing</Link>
+        <Link href="/">Torna alla landing</Link>
       </section>
     </main>
   );

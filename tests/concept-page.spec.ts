@@ -300,7 +300,7 @@ test("tutte le CTA primarie portano alla destinazione provvisoria", async ({ pag
   await expect(page.getByText("Destinazione provvisoria")).toBeVisible();
   await expect(page.getByRole("link", { name: "Torna alla landing" })).toHaveAttribute(
     "href",
-    "/concept/page",
+    "/",
   );
 });
 

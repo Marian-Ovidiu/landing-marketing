@@ -27,7 +27,8 @@ const caveat = Caveat({
 // Direzione B «Segnale»: display del tema, consumato SOLO dallo scope
 // [data-theme="segnale"] (`--font-display: var(--font-display-b)`).
 // Font variabile: un unico file copre i pesi usati (560-650); niente preload
-// perché serve soltanto alla route /concept/segnale, non alla Direzione A.
+// perché serve soltanto alla landing Segnale (`/` e `/concept/segnale`), non
+// alla Direzione A.
 const interTight = Inter_Tight({
   subsets: ["latin"],
   variable: "--font-display-b",
