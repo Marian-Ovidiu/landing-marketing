@@ -113,6 +113,11 @@
   color: var(--text-secondary);
 }
 
+.segnale-s02-status,
+.segnale-s02-outcome {
+  display: none;
+}
+
 .segnale-s02-mass--lun {
   top: 118px;
   left: 0;
@@ -458,7 +463,7 @@
 @media (max-width: 767px) {
   .segnale-weekly-rhythm-inner {
     min-height: min(800px, 100svh);
-    padding: 8px 16px 2px;
+    padding: 4px 16px 0;
   }
 
   .segnale-s02-header {
@@ -497,7 +502,13 @@
   }
 
   .segnale-s02-field {
+    height: 568px;
     margin-top: 26px;
+  }
+
+  .segnale-s02-mass,
+  .segnale-s02-quiet-list li {
+    z-index: 1;
   }
 
   .segnale-s02-label {
@@ -528,29 +539,121 @@
     opacity: 0.78;
   }
 
+  .segnale-s02-status {
+    position: absolute;
+    top: 16px;
+    left: var(--s02-status-left);
+    display: block;
+    margin: 0;
+    padding-inline: 5px;
+    background: var(--surface-canvas);
+    color: var(--text-primary);
+    font-family: var(--font-mono), monospace;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.055em;
+  }
+
+  .segnale-s02-mass--lun {
+    --s02-status-left: 58px;
+  }
+
   .segnale-s02-mass--mar {
+    --s02-status-left: 92px;
     top: 171px;
+  }
+
+  .segnale-s02-mass--dom {
+    --s02-status-left: 124px;
+  }
+
+  .segnale-s02-outcome {
+    display: flex;
+    max-width: 350px;
+    margin: 6px 0 0;
+    align-items: baseline;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 11px;
+    line-height: 1.2;
+  }
+
+  .segnale-s02-outcome-label {
+    flex: none;
+    color: var(--text-primary);
+    font-family: var(--font-mono), monospace;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .segnale-s02-outcome-value {
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-weight: 500;
   }
 
   .segnale-s02-quiet-list li {
     font-size: 11px;
     font-weight: 400;
-    line-height: 1.3;
+    line-height: 1.15;
     letter-spacing: 0;
   }
 
-  .segnale-s02-quiet-list li:nth-child(1) { top: 134px; }
-  .segnale-s02-quiet-list li:nth-child(2) { top: 320px; }
-  .segnale-s02-quiet-list li:nth-child(3) { top: 341px; }
-  .segnale-s02-quiet-list li:nth-child(4) { top: 362px; }
+  .segnale-s02-quiet-list li:nth-child(1) { top: 337px; }
+  .segnale-s02-quiet-list li:nth-child(2) { top: 350px; }
+  .segnale-s02-quiet-list li:nth-child(3) { top: 363px; }
+  .segnale-s02-quiet-list li:nth-child(4) { top: 376px; }
 
   .segnale-s02-quiet-mobile {
+    display: inline-flex;
+    align-items: baseline;
+    white-space: nowrap;
+    opacity: 0.74;
+    text-transform: none;
+  }
+
+  .segnale-s02-quiet-day,
+  .segnale-s02-quiet-time {
+    font-family: var(--font-mono), monospace;
+  }
+
+  .segnale-s02-quiet-day {
+    color: var(--text-primary);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .segnale-s02-quiet-action {
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-weight: 450;
+  }
+
+  .segnale-s02-quiet-time {
     opacity: 0.72;
-    text-transform: lowercase;
+  }
+
+  .segnale-s02-band {
+    z-index: 0;
+    height: 548px;
+  }
+
+  .segnale-s02-band-mobile [data-band-base] {
+    stroke-width: 1.4px;
+    opacity: 0.92;
+  }
+
+  .segnale-s02-band-mobile .segnale-s02-accent {
+    stroke-width: 2.4px;
+    opacity: 1;
+  }
+
+  .segnale-s02-band-mobile ellipse {
+    fill: var(--accent-primary);
+    stroke-width: 0;
   }
 
   .segnale-s02-closing {
-    margin-top: 10px;
+    margin-top: 5px;
   }
 
   .segnale-s02-total {
@@ -562,6 +665,21 @@
     margin-top: 5px;
     font-size: 11.5px;
     line-height: 1.4;
+  }
+}
+
+/* Con browser chrome aperto la superficie resta alta 800px: lo sticky
+   nativo compie gli ultimi pixel di scorrimento e rende leggibile la chiusa,
+   senza alterare runway o timeline GSAP. */
+@media (max-width: 767px) and (max-height: 760px) and (prefers-reduced-motion: no-preference) {
+  .segnale-weekly-rhythm-sticky {
+    min-height: 800px;
+    height: 800px;
+    overflow: visible;
+  }
+
+  .segnale-weekly-rhythm-inner {
+    min-height: 800px;
   }
 }
 

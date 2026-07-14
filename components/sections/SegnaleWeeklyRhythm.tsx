@@ -26,7 +26,8 @@ const quietDays = [
     ...byId("mercoledi"),
     wide: "10 RISPOSTE · 45 MIN",
     narrow: "45 MIN",
-    mobile: "MER · PREPARA E PUBBLICA 10 RISPOSTE · 45 MIN",
+    mobileAction: "prepara e pubblica 10 risposte",
+    mobileTime: "45 min",
     accessible:
       "Mercoledì: prepara, rileggi e pubblica manualmente dieci risposte alle recensioni. Durata 45 minuti. Obiettivo: rispondere con continuità. Risultato da registrare manualmente: recensioni a cui hai risposto.",
   },
@@ -34,7 +35,8 @@ const quietDays = [
     ...byId("giovedi"),
     wide: "APERITIVO · 30 MIN",
     narrow: "30 MIN",
-    mobile: "GIO · PUBBLICA L’APERITIVO · 30 MIN",
+    mobileAction: "pubblica l’aperitivo",
+    mobileTime: "30 min",
     accessible:
       "Giovedì: pubblica manualmente l’aperitivo su Instagram. Durata 30 minuti. Obiettivo: mostrare la proposta nella fascia 18–20. Risultato da registrare manualmente: richieste riferite all’iniziativa.",
   },
@@ -42,7 +44,8 @@ const quietDays = [
     ...byId("venerdi"),
     wide: "QR RECENSIONI · 20 MIN",
     narrow: "20 MIN",
-    mobile: "VEN · BIGLIETTINO RECENSIONI CON QR · 20 MIN",
+    mobileAction: "bigliettino recensioni con QR",
+    mobileTime: "20 min",
     accessible:
       "Venerdì: prepara e metti sui tavoli il bigliettino per le recensioni con codice QR. Durata 20 minuti. Obiettivo: facilitare una recensione dopo il servizio. Risultato da registrare manualmente: recensioni nuove.",
   },
@@ -50,7 +53,8 @@ const quietDays = [
     ...byId("sabato"),
     wide: "10 FOTO · 30 MIN",
     narrow: "30 MIN",
-    mobile: "SAB · SCATTA 10 FOTO DURANTE IL SERVIZIO · 30 MIN",
+    mobileAction: "scatta 10 foto durante il servizio",
+    mobileTime: "30 min",
     accessible:
       "Sabato: scatta manualmente dieci foto durante il servizio. Durata 30 minuti. Obiettivo: creare materiale per le attività di contenuto. Risultato da osservare: dieci foto utilizzabili.",
   },
@@ -85,9 +89,9 @@ function RhythmBand() {
           I marker sono ellissi pre-compensate per restare cerchi da 4px. */}
       <g className="segnale-s02-band-mobile">
         <path data-band-base pathLength="1" d="M0 24.8 H684.6 M0 206.7 H755.9 M0 464 H527.7" />
-        <path className="segnale-s02-accent" data-accent-lun pathLength="1" d="M0 24.8 H228.2" />
-        <path className="segnale-s02-accent" data-accent-mar pathLength="1" d="M0 206.7 H228.2" />
-        <path className="segnale-s02-accent" data-accent-dom pathLength="1" d="M0 464 H228.2" />
+        <path className="segnale-s02-accent" data-accent-lun pathLength="1" d="M0 24.8 H170" />
+        <path className="segnale-s02-accent" data-accent-mar pathLength="1" d="M0 206.7 H300" />
+        <path className="segnale-s02-accent" data-accent-dom pathLength="1" d="M0 464 H420" />
         <ellipse data-marker-lun cx="21.4" cy="24.8" rx="14.3" ry="4.3" />
         <ellipse data-marker-mar cx="21.4" cy="206.7" rx="14.3" ry="4.3" />
         <ellipse data-marker-dom cx="21.4" cy="464" rx="14.3" ry="4.3" />
@@ -120,6 +124,11 @@ export function SegnaleWeeklyRhythm() {
           mar: all<SVGCircleElement>("[data-marker-mar]"),
           dom: all<SVGCircleElement>("[data-marker-dom]"),
         };
+        const mobileMarkers = {
+          lun: all<SVGEllipseElement>(".segnale-s02-band-mobile [data-marker-lun]"),
+          mar: all<SVGEllipseElement>(".segnale-s02-band-mobile [data-marker-mar]"),
+          dom: all<SVGEllipseElement>(".segnale-s02-band-mobile [data-marker-dom]"),
+        };
         const massLun = section.querySelector("[data-mass-lun]");
         const massMar = section.querySelector("[data-mass-mar]");
         const massDom = section.querySelector("[data-mass-dom]");
@@ -140,6 +149,9 @@ export function SegnaleWeeklyRhythm() {
         });
         gsap.set([...markers.lun, ...markers.mar, ...markers.dom], {
           stroke: "var(--s02-line)",
+        });
+        gsap.set([...mobileMarkers.lun, ...mobileMarkers.mar, ...mobileMarkers.dom], {
+          fill: "var(--s02-line)",
         });
         gsap.set([massLun, massMar], { opacity: 0.3, y: 10 });
         gsap.set(massDom, { opacity: 0.3, y: 10 });
@@ -166,6 +178,7 @@ export function SegnaleWeeklyRhythm() {
           .to(accents.lun, { strokeDashoffset: 0, duration: 12 }, 20)
           .to(dayStrong.lun, { opacity: 1, duration: 10 }, 20)
           .to(markers.lun, { stroke: "var(--accent-primary)", duration: 3 }, 32)
+          .to(mobileMarkers.lun, { fill: "var(--accent-primary)", duration: 3 }, 32)
           // 35–60 · attivazione: MAR si forma, i giorni quieti arretrano
           .to(massMar, { opacity: 1, y: 0, duration: 25 }, 35)
           .to(accents.mar, { strokeDashoffset: 0, duration: 14 }, 40)
@@ -173,11 +186,13 @@ export function SegnaleWeeklyRhythm() {
           .to(quiet, { opacity: 0.42, duration: 25 }, 35)
           .to(massDom, { opacity: 0.45, y: 6, duration: 22 }, 36)
           .to(markers.mar, { stroke: "var(--accent-primary)", duration: 3 }, 57)
+          .to(mobileMarkers.mar, { fill: "var(--accent-primary)", duration: 3 }, 57)
           // 60–80 · verifica: DOM completa il gradino
           .to(massDom, { opacity: 1, y: 0, duration: 20 }, 60)
           .to(accents.dom, { strokeDashoffset: 0, duration: 12 }, 64)
           .to(dayStrong.dom, { opacity: 1, duration: 10 }, 64)
           .to(markers.dom, { stroke: "var(--accent-primary)", duration: 3 }, 77)
+          .to(mobileMarkers.dom, { fill: "var(--accent-primary)", duration: 3 }, 77)
           // 80–100 · piano eseguibile: i quieti risalgono, la chiusa si compie
           .to(quiet, { opacity: 0.58, duration: 15 }, 82)
           .to(closing, { opacity: 1, y: 0, duration: 16 }, 82);
@@ -208,44 +223,68 @@ export function SegnaleWeeklyRhythm() {
           </header>
 
           <div className="segnale-s02-field">
-            <article className="segnale-s02-mass segnale-s02-mass--lun" data-mass-lun aria-labelledby="segnale-s02-lun">
+            <article className="segnale-s02-mass segnale-s02-mass--lun" data-mass-lun data-scene-kind="mission" aria-labelledby="segnale-s02-lun">
               <p className="segnale-s02-label">LUNEDÌ · PREPARAZIONE</p>
-              <h3 id="segnale-s02-lun">{guillemets(lun.action)}.</h3>
-              <p className="segnale-s02-result">Obiettivo: farti trovare da chi cerca «dove mangiare» in zona.</p>
-              <p className="segnale-s02-meta">2 ORE · SCHEDA GOOGLE · AGGIORNAMENTO MANUALE</p>
+              <p className="segnale-s02-status" data-operational-status="da-preparare">DA PREPARARE</p>
+              <h3 id="segnale-s02-lun" data-mission>{guillemets(lun.action)}.</h3>
+              <p className="segnale-s02-result" data-objective>Obiettivo: farti trovare da chi cerca «dove mangiare» in zona.</p>
+              <p className="segnale-s02-meta" data-meta-level="1">
+                <span className="segnale-s02-meta-wide">2 ORE · SCHEDA GOOGLE · AGGIORNAMENTO MANUALE</span>
+                <span className="segnale-s02-meta-mobile">2 ORE · SCHEDA GOOGLE</span>
+              </p>
+              <p className="segnale-s02-outcome" data-meta-level="2" data-outcome>
+                <span className="segnale-s02-outcome-label">DA OSSERVARE</span>
+                <span className="segnale-s02-outcome-value">Visualizzazioni scheda</span>
+              </p>
             </article>
 
-            <article className="segnale-s02-mass segnale-s02-mass--mar" data-mass-mar aria-labelledby="segnale-s02-mar">
+            <article className="segnale-s02-mass segnale-s02-mass--mar" data-mass-mar data-scene-kind="mission" aria-labelledby="segnale-s02-mar">
               <p className="segnale-s02-label">MARTEDÌ SERA · ATTIVAZIONE NEL GIORNO VUOTO</p>
-              <h3 id="segnale-s02-mar">
+              <p className="segnale-s02-status" data-operational-status="in-programma">IN PROGRAMMA</p>
+              <h3 id="segnale-s02-mar" data-mission>
                 <span>{marLineOne}</span> <span>{marLineTwo}</span>
               </h3>
-              <p className="segnale-s02-result">Obiettivo: dare un motivo per venire nel giorno che oggi resta vuoto.</p>
-              <p className="segnale-s02-meta">
+              <p className="segnale-s02-result" data-objective>Obiettivo: dare un motivo per venire nel giorno che oggi resta vuoto.</p>
+              <p className="segnale-s02-meta" data-meta-level="1">
                 <span className="segnale-s02-meta-wide">1 ORA · SALA + CARTELLO IN VETRINA · OSSERVA I COPERTI</span>
-                <span className="segnale-s02-meta-mobile">1 ORA · SALA + VETRINA · OSSERVA I COPERTI</span>
+                <span className="segnale-s02-meta-mobile">1 ORA · SALA + VETRINA</span>
+              </p>
+              <p className="segnale-s02-outcome" data-meta-level="2" data-outcome>
+                <span className="segnale-s02-outcome-label">DA OSSERVARE</span>
+                <span className="segnale-s02-outcome-value">Coperti del martedì</span>
               </p>
             </article>
 
             <ul className="segnale-s02-quiet-list" aria-label="Giorni di mantenimento">
               {quietDays.map((item) => (
-                <li key={item.id} data-quiet aria-label={item.accessible}>
+                <li key={item.id} data-quiet data-meta-level="3" aria-label={item.accessible}>
                   <span className="segnale-s02-quiet-wide">{item.wide}</span>
                   <span className="segnale-s02-quiet-narrow">{item.narrow}</span>
-                  <span className="segnale-s02-quiet-mobile">{item.mobile}</span>
+                  <span className="segnale-s02-quiet-mobile">
+                    <span className="segnale-s02-quiet-day">{item.shortDay}</span>
+                    <span aria-hidden="true"> · </span>
+                    <span className="segnale-s02-quiet-action">{item.mobileAction}</span>
+                    <span aria-hidden="true"> · </span>
+                    <span className="segnale-s02-quiet-time">{item.mobileTime}</span>
+                  </span>
                 </li>
               ))}
             </ul>
 
-            <article className="segnale-s02-mass segnale-s02-mass--dom" data-mass-dom aria-labelledby="segnale-s02-dom">
+            <article className="segnale-s02-mass segnale-s02-mass--dom" data-mass-dom data-scene-kind="verification" aria-labelledby="segnale-s02-dom">
               <p className="segnale-s02-label">DOMENICA · VERIFICA</p>
-              <h3 id="segnale-s02-dom">
+              <p className="segnale-s02-status" data-operational-status="da-verificare">DA VERIFICARE</p>
+              <h3 id="segnale-s02-dom" data-mission>
                 <span>{domLineOne}</span> <span>{domLineTwo}</span>
               </h3>
-              <p className="segnale-s02-result">I risultati restano nel riepilogo per le verifiche successive.</p>
-              <p className="segnale-s02-meta">
+              <p className="segnale-s02-result" data-objective>I risultati restano nel riepilogo per le verifiche successive.</p>
+              <p className="segnale-s02-meta" data-meta-level="1">
                 <span className="segnale-s02-meta-wide">15 MINUTI · INSERIMENTO MANUALE · RIEPILOGO BASE</span>
-                <span className="segnale-s02-meta-mobile">15 MIN · INSERIMENTO MANUALE · RIEPILOGO BASE</span>
+                <span className="segnale-s02-meta-mobile">15 MIN · RIEPILOGO BASE</span>
+              </p>
+              <p className="segnale-s02-outcome" data-meta-level="2" data-outcome>
+                <span className="segnale-s02-outcome-label">DA REGISTRARE</span>
+                <span className="segnale-s02-outcome-value">Scheda Google · coperti · recensioni nuove</span>
               </p>
             </article>
 
