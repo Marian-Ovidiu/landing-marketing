@@ -689,6 +689,223 @@
   }
 }
 
+/* Sprint 8: gerarchia editoriale mobile. Il breakpoint 768 resta invariato. */
+@media (max-width: 767px) {
+  .surfaceHeader,
+  .chapterLabel,
+  .colophon {
+    font-size: 11px;
+    line-height: 1.4;
+    letter-spacing: 0.105em;
+  }
+
+  .surfaceHeader p:last-child::after {
+    font-size: 11px;
+  }
+
+  .surfaceBody {
+    padding-top: 17px;
+  }
+
+  .priorities h3 {
+    margin: 8px 0 9px;
+    font-size: clamp(21px, 5.4vw, 22px);
+    line-height: 1.08;
+  }
+
+  .priorities li {
+    min-height: 40px;
+    grid-template-columns: 20px minmax(0, 1fr) auto;
+    font-size: 13px;
+  }
+
+  .priorities li strong {
+    font-size: 18px;
+  }
+
+  .priorities li em {
+    max-width: 82px;
+    font-size: 11px;
+    line-height: 1.2;
+    letter-spacing: 0.055em;
+  }
+
+  .week {
+    padding-top: 18px;
+  }
+
+  .week ul {
+    margin-top: 9px;
+    padding-bottom: 11px;
+  }
+
+  .week li {
+    min-height: 25px;
+  }
+
+  .week li strong,
+  .week li em {
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  .week li span {
+    font-size: 13px;
+    line-height: 1.3;
+  }
+
+  .indicators {
+    padding-top: 18px;
+  }
+
+  .indicators ul {
+    margin-top: 9px;
+  }
+
+  .indicators li {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .secondary {
+    margin-top: 14px;
+    padding-top: 9px;
+  }
+
+  .secondary section {
+    min-height: 17px;
+  }
+
+  /* Le sei aree sono già nominate una volta: I, II e VI nei nuclei, III–V qui. */
+  .index {
+    display: none;
+  }
+
+  .colophon {
+    right: 17px;
+    bottom: 7px;
+    left: 17px;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .closing {
+    font-size: 11px;
+    line-height: 1.45;
+    letter-spacing: 0.07em;
+  }
+
+  .rules path:last-child {
+    transform: translate(12px, 361px) scaleX(6.7);
+  }
+}
+
+@media (max-width: 767px) and (max-height: 820px) {
+  .rules path:last-child {
+    transform: translate(12px, 350px) scaleX(6.7);
+  }
+}
+
+/* Browser chrome visibile: stessa gerarchia, geometria verticale più corta. */
+@media (max-width: 767px) and (max-height: 760px) {
+  .header {
+    top: 14px;
+  }
+
+  .header h2 {
+    margin-block: 8px 6px;
+    font-size: 24px;
+    line-height: 1.04;
+  }
+
+  .intro {
+    font-size: 11.5px;
+    line-height: 1.45;
+  }
+
+  .surface {
+    top: 164px;
+    height: 510px;
+    padding: 13px 15px 11px;
+  }
+
+  .surfaceHeader {
+    min-height: 25px;
+    padding-bottom: 9px;
+  }
+
+  .surfaceBody {
+    height: auto;
+    padding-top: 11px;
+  }
+
+  .priorities h3 {
+    margin: 5px 0 6px;
+    font-size: 20px;
+  }
+
+  .priorities li {
+    min-height: 36px;
+  }
+
+  .week {
+    padding-top: 10px;
+  }
+
+  .week ul {
+    margin-top: 5px;
+    padding-bottom: 6px;
+  }
+
+  .week li {
+    min-height: 22px;
+  }
+
+  .week li span {
+    font-size: 12px;
+  }
+
+  .indicators {
+    padding-top: 10px;
+  }
+
+  .indicators ul {
+    margin-top: 5px;
+  }
+
+  .indicators li {
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .secondary {
+    margin-top: 8px;
+    padding-top: 7px;
+  }
+
+  .secondary section {
+    min-height: 16px;
+  }
+
+  .secondary .chapterLabel {
+    line-height: 1.3;
+  }
+
+  .colophon {
+    bottom: 9px;
+    line-height: 1.3;
+  }
+
+  .closing {
+    top: 686px;
+  }
+
+  .rules path:last-child {
+    transform: translate(12px, 243px) scaleX(6.7);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .section {
     height: auto;

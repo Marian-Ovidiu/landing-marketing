@@ -198,3 +198,139 @@ test("il cambio S02→S03 è netto e le sezioni congelate restano montate", asyn
   expect(colors.s03).toBe("rgb(23, 27, 29)");
   expect(colors.surface).toBe("rgb(242, 243, 241)");
 });
+
+test("mobile: tre nuclei leggibili, font >= 11px e fascia bassa senza overlap", async ({ browser, baseURL }, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium-desktop", "matrice geometrica eseguita una sola volta");
+
+  for (const viewport of [
+    { width: 360, height: 800 },
+    { width: 375, height: 812 },
+    { width: 390, height: 844 },
+    { width: 393, height: 873 },
+    { width: 412, height: 915 },
+    { width: 390, height: 720 },
+  ]) {
+    const context = await browser.newContext({ viewport });
+    const localPage = await context.newPage();
+    const captured: string[] = [];
+    localPage.on("console", (message) => {
+      if (message.type() === "error") captured.push(message.text());
+    });
+    localPage.on("pageerror", (error) => captured.push(error.message));
+    await localPage.goto(`${baseURL}/concept/segnale`, { waitUntil: "networkidle" });
+    await moveTo(localPage, 1);
+
+    const hierarchy = await localPage.locator("#section-03-cosa-ricevi").evaluate((section) => {
+      const surface = section.querySelector<HTMLElement>("[data-s03-surface]")!;
+      const surfaceRect = surface.getBoundingClientRect();
+      const visible = (node: Element) => {
+        const style = getComputedStyle(node);
+        const rect = node.getBoundingClientRect();
+        return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+      };
+      const box = (selector: string) => {
+        const rect = section.querySelector(selector)!.getBoundingClientRect();
+        return { top: rect.top, right: rect.right, bottom: rect.bottom, left: rect.left, width: rect.width, height: rect.height };
+      };
+      const readable = Array.from(surface.querySelectorAll("h3, p, li, span, strong, em, footer"))
+        .filter(visible)
+        .map((node) => {
+          const style = getComputedStyle(node);
+          const pseudo = getComputedStyle(node, "::after");
+          const ownSize = parseFloat(style.fontSize);
+          const pseudoSize = pseudo.content !== "none" ? parseFloat(pseudo.fontSize) : 0;
+          return { text: node.textContent?.trim(), size: Math.max(ownSize, pseudoSize) };
+        })
+        .filter(({ text, size }) => Boolean(text) || size > 0);
+      const contained = Array.from(surface.querySelectorAll("h3, p, li, footer"))
+        .filter(visible)
+        .every((node) => {
+          const rect = node.getBoundingClientRect();
+          return rect.left >= surfaceRect.left - 1 && rect.right <= surfaceRect.right + 1 && rect.top >= surfaceRect.top - 1 && rect.bottom <= surfaceRect.bottom + 1;
+        });
+      const priorities = box("[data-s03-priorities]");
+      const week = box("[data-s03-week]");
+      const indicators = box("[data-s03-indicators]");
+      const secondary = box("[data-s03-secondary]");
+      const colophon = box("[data-s03-surface] > footer");
+      const lastPriority = Array.from(section.querySelectorAll("[data-s03-priorities] li")).at(-1)!.getBoundingClientRect();
+      const weekLabel = section.querySelector("[data-s03-week] > p")!.getBoundingClientRect();
+      const visibleWeekRows = Array.from(section.querySelectorAll("[data-s03-week] li")).filter(visible);
+      const lastWeek = visibleWeekRows.at(-1)!.getBoundingClientRect();
+      const indicatorLabel = section.querySelector("[data-s03-indicators] > p")!.getBoundingClientRect();
+      const lastIndicator = Array.from(section.querySelectorAll("[data-s03-indicators] li")).at(-1)!.getBoundingClientRect();
+      const secondaryLabel = section.querySelector("[data-s03-secondary] section > p")!.getBoundingClientRect();
+      const closingRule = section.querySelector("[data-s03-closing-rule]")!.getBoundingClientRect();
+      const closing = box("[data-s03-closing]");
+
+      return {
+        nuclei: [priorities, week, indicators],
+        minFont: Math.min(...readable.map(({ size }) => size)),
+        contained,
+        indexVisible: visible(section.querySelector("[aria-label='Indice delle sei aree']")!),
+        gaps: {
+          priorityToWeek: weekLabel.top - lastPriority.bottom,
+          weekToIndicators: indicatorLabel.top - lastWeek.bottom,
+          indicatorsToSecondary: secondaryLabel.top - lastIndicator.bottom,
+          secondaryToColophon: colophon.top - secondary.bottom,
+        },
+        closingRuleDelta: closingRule.top - secondary.top,
+        closingRuleToLabel: secondaryLabel.top - closingRule.bottom,
+        viewportContainment: {
+          surfaceBottom: surfaceRect.bottom,
+          closingBottom: closing.bottom,
+          viewportHeight: window.innerHeight,
+        },
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    });
+
+    expect(hierarchy.nuclei).toHaveLength(3);
+    expect(hierarchy.nuclei.every(({ width, height }) => width > 0 && height > 0)).toBe(true);
+    expect(hierarchy.minFont).toBeGreaterThanOrEqual(11);
+    expect(hierarchy.contained).toBe(true);
+    expect(hierarchy.indexVisible).toBe(false);
+    expect(hierarchy.gaps.priorityToWeek).toBeGreaterThanOrEqual(viewport.height <= 760 ? 9 : 17);
+    expect(hierarchy.gaps.weekToIndicators).toBeGreaterThanOrEqual(viewport.height <= 760 ? 9 : 17);
+    expect(hierarchy.gaps.indicatorsToSecondary).toBeGreaterThanOrEqual(viewport.height <= 760 ? 15 : 22);
+    expect(hierarchy.gaps.secondaryToColophon).toBeGreaterThanOrEqual(6);
+    expect(Math.abs(hierarchy.closingRuleDelta)).toBeLessThanOrEqual(2);
+    expect(hierarchy.closingRuleToLabel).toBeGreaterThanOrEqual(7);
+    expect(hierarchy.overflow).toBeLessThanOrEqual(0);
+    if (viewport.height <= 760) {
+      expect(hierarchy.viewportContainment.surfaceBottom).toBeLessThanOrEqual(viewport.height);
+      expect(hierarchy.viewportContainment.closingBottom).toBeLessThanOrEqual(viewport.height);
+    }
+    expect(captured).toEqual([]);
+    await context.close();
+  }
+});
+
+test("768 e desktop mantengono la geometria approvata", async ({ browser, baseURL }, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium-desktop", "regressione geometrica eseguita una sola volta");
+
+  for (const [viewport, expected] of [
+    [{ width: 768, height: 900 }, { x: 124, y: 194, width: 520, height: 590, label: 10, index: true }],
+    [{ width: 1440, height: 1000 }, { x: 348, y: 226, width: 996, height: 608, label: 10, index: true }],
+  ] as const) {
+    const context = await browser.newContext({ viewport });
+    const localPage = await context.newPage();
+    await localPage.goto(`${baseURL}/concept/segnale`, { waitUntil: "networkidle" });
+    await moveTo(localPage, 1);
+    const geometry = await localPage.locator("#section-03-cosa-ricevi").evaluate((section) => {
+      const surface = section.querySelector<HTMLElement>("[data-s03-surface]")!;
+      const rect = surface.getBoundingClientRect();
+      const index = section.querySelector<HTMLElement>("[aria-label='Indice delle sei aree']")!;
+      return {
+        x: rect.x,
+        y: rect.y,
+        width: rect.width,
+        height: rect.height,
+        label: parseFloat(getComputedStyle(section.querySelector("[data-s03-priorities] > p")!).fontSize),
+        index: getComputedStyle(index).display !== "none" && index.getBoundingClientRect().width > 0,
+      };
+    });
+    expect(geometry).toEqual(expected);
+    await context.close();
+  }
+});
