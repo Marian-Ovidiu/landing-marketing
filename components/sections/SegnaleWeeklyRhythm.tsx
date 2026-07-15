@@ -62,6 +62,12 @@ const quietDays = [
 
 const DAYS = ["LUN", "MAR", "MER", "GIO", "VEN", "SAB", "DOM"] as const;
 
+const MOBILE_SCENE_SHIFT = {
+  initial: 10,
+  preview: 6,
+  settled: 0,
+} as const;
+
 // Un solo SVG strutturale: banda, tick, accenti e marker (aria-hidden).
 // Gruppo desktop (viewBox 1248×590, banda y260, gradino y278 da x1070) e
 // gruppo mobile (tre frammenti autonomi). Nessun testo.
@@ -88,13 +94,21 @@ function RhythmBand() {
           (1248×590) e rese in un box da 350×548: x×3.5657, y×1.0766.
           I marker sono ellissi pre-compensate per restare cerchi da 4px. */}
       <g className="segnale-s02-band-mobile">
-        <path data-band-base pathLength="1" d="M0 24.8 H684.6 M0 206.7 H755.9 M0 464 H527.7" />
-        <path className="segnale-s02-accent" data-accent-lun pathLength="1" d="M0 24.8 H170" />
-        <path className="segnale-s02-accent" data-accent-mar pathLength="1" d="M0 206.7 H300" />
-        <path className="segnale-s02-accent" data-accent-dom pathLength="1" d="M0 464 H420" />
-        <ellipse data-marker-lun cx="21.4" cy="24.8" rx="14.3" ry="4.3" />
-        <ellipse data-marker-mar cx="21.4" cy="206.7" rx="14.3" ry="4.3" />
-        <ellipse data-marker-dom cx="21.4" cy="464" rx="14.3" ry="4.3" />
+        <g data-timeline-lun>
+          <path data-band-base pathLength="1" d="M0 24.8 H684.6" />
+          <path className="segnale-s02-accent" data-accent-lun pathLength="1" d="M0 24.8 H170" />
+          <ellipse data-marker-lun cx="21.4" cy="24.8" rx="14.3" ry="4.3" />
+        </g>
+        <g data-timeline-mar>
+          <path data-band-base pathLength="1" d="M0 206.7 H755.9" />
+          <path className="segnale-s02-accent" data-accent-mar pathLength="1" d="M0 206.7 H300" />
+          <ellipse data-marker-mar cx="21.4" cy="206.7" rx="14.3" ry="4.3" />
+        </g>
+        <g data-timeline-dom>
+          <path data-band-base pathLength="1" d="M0 464 H527.7" />
+          <path className="segnale-s02-accent" data-accent-dom pathLength="1" d="M0 464 H420" />
+          <ellipse data-marker-dom cx="21.4" cy="464" rx="14.3" ry="4.3" />
+        </g>
       </g>
     </svg>
   );
@@ -111,8 +125,15 @@ export function SegnaleWeeklyRhythm() {
     const ctx = gsap.context(() => {
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const isMobile = window.matchMedia("(max-width: 767px)").matches;
+        const sceneContrast = (anchor: number, primary: number, secondary: number) => ({
+          "--s02-anchor-opacity": anchor,
+          "--s02-primary-opacity": primary,
+          "--s02-secondary-opacity": secondary,
+        });
         const all = <T extends Element>(selector: string) =>
           gsap.utils.toArray<T>(section.querySelectorAll(selector));
+        const mobileBand = section.querySelector<SVGSVGElement>(".segnale-s02-band");
         const bands = all<SVGPathElement>("[data-band-base]");
         const accents = {
           lun: all<SVGPathElement>("[data-accent-lun]"),
@@ -132,6 +153,31 @@ export function SegnaleWeeklyRhythm() {
         const massLun = section.querySelector("[data-mass-lun]");
         const massMar = section.querySelector("[data-mass-mar]");
         const massDom = section.querySelector("[data-mass-dom]");
+        const mobileSceneContent = (mass: Element | null) =>
+          mass
+            ? Array.from(
+                mass.querySelectorAll<HTMLElement>(
+                  ".segnale-s02-status, h3, .segnale-s02-result, .segnale-s02-meta, .segnale-s02-outcome",
+                ),
+              )
+            : [];
+        const mobileContent = {
+          lun: isMobile ? mobileSceneContent(massLun) : [],
+          mar: isMobile ? mobileSceneContent(massMar) : [],
+          dom: isMobile ? mobileSceneContent(massDom) : [],
+        };
+        const mobileTimeline = {
+          lun: isMobile ? all<SVGGElement>("[data-timeline-lun]") : [],
+          mar: isMobile ? all<SVGGElement>("[data-timeline-mar]") : [],
+          dom: isMobile ? all<SVGGElement>("[data-timeline-dom]") : [],
+        };
+        const mobileTimelineY = (cssPixels: number) => {
+          const renderedHeight = mobileBand?.getBoundingClientRect().height ?? 0;
+          const viewBoxHeight = mobileBand?.viewBox.baseVal.height ?? 0;
+          return renderedHeight > 0 && viewBoxHeight > 0
+            ? (cssPixels * viewBoxHeight) / renderedHeight
+            : cssPixels;
+        };
         const quiet = all<HTMLElement>("[data-quiet]");
         const dayStrong = {
           lun: all<HTMLElement>("[data-day-lun]"),
@@ -151,11 +197,28 @@ export function SegnaleWeeklyRhythm() {
           stroke: "var(--s02-line)",
         });
         gsap.set([...mobileMarkers.lun, ...mobileMarkers.mar, ...mobileMarkers.dom], {
-          fill: "var(--s02-line)",
+          fill: isMobile ? "var(--text-secondary)" : "var(--s02-line)",
         });
-        gsap.set([massLun, massMar], { opacity: 0.3, y: 10 });
-        gsap.set(massDom, { opacity: 0.3, y: 10 });
-        gsap.set(quiet, { opacity: 0.6 });
+        if (isMobile) {
+          gsap.set(massLun, {
+            opacity: 1,
+            ...sceneContrast(0.78, 0.52, 0.42),
+          });
+          gsap.set([massMar, massDom], {
+            opacity: 1,
+            ...sceneContrast(0.62, 0.36, 0.28),
+          });
+          gsap.set([...mobileContent.lun, ...mobileContent.mar, ...mobileContent.dom], {
+            y: MOBILE_SCENE_SHIFT.initial,
+          });
+          gsap.set([...mobileTimeline.lun, ...mobileTimeline.mar, ...mobileTimeline.dom], {
+            y: mobileTimelineY(MOBILE_SCENE_SHIFT.initial),
+          });
+        } else {
+          gsap.set([massLun, massMar], { opacity: 0.3, y: 10 });
+          gsap.set(massDom, { opacity: 0.3, y: 10 });
+        }
+        gsap.set(quiet, { opacity: isMobile ? 0.62 : 0.6 });
         gsap.set([...dayStrong.lun, ...dayStrong.mar, ...dayStrong.dom], { opacity: 0.62 });
         gsap.set(closing, { opacity: 0.12, y: 8 });
 
@@ -174,28 +237,100 @@ export function SegnaleWeeklyRhythm() {
           // 0–15 · settimana aperta: la banda hairline si completa
           .to(bands, { strokeDashoffset: 0, duration: 15 }, 0)
           // 15–35 · preparazione: LUN si forma, poi il marker guadagna teal
-          .to(massLun, { opacity: 1, y: 0, duration: 20 }, 15)
+          .to(
+            massLun,
+            isMobile
+              ? { ...sceneContrast(1, 1, 1), duration: 20 }
+              : { opacity: 1, y: 0, duration: 20 },
+            15,
+          )
           .to(accents.lun, { strokeDashoffset: 0, duration: 12 }, 20)
           .to(dayStrong.lun, { opacity: 1, duration: 10 }, 20)
           .to(markers.lun, { stroke: "var(--accent-primary)", duration: 3 }, 32)
           .to(mobileMarkers.lun, { fill: "var(--accent-primary)", duration: 3 }, 32)
           // 35–60 · attivazione: MAR si forma, i giorni quieti arretrano
-          .to(massMar, { opacity: 1, y: 0, duration: 25 }, 35)
+          .to(
+            massMar,
+            isMobile
+              ? { ...sceneContrast(1, 1, 1), duration: 25 }
+              : { opacity: 1, y: 0, duration: 25 },
+            35,
+          )
           .to(accents.mar, { strokeDashoffset: 0, duration: 14 }, 40)
           .to(dayStrong.mar, { opacity: 1, duration: 10 }, 40)
-          .to(quiet, { opacity: 0.42, duration: 25 }, 35)
-          .to(massDom, { opacity: 0.45, y: 6, duration: 22 }, 36)
+          .to(quiet, { opacity: isMobile ? 0.5 : 0.42, duration: 25 }, 35)
+          .to(
+            massDom,
+            isMobile
+              ? { ...sceneContrast(0.66, 0.38, 0.3), duration: 22 }
+              : { opacity: 0.45, y: 6, duration: 22 },
+            36,
+          )
           .to(markers.mar, { stroke: "var(--accent-primary)", duration: 3 }, 57)
           .to(mobileMarkers.mar, { fill: "var(--accent-primary)", duration: 3 }, 57)
           // 60–80 · verifica: DOM completa il gradino
-          .to(massDom, { opacity: 1, y: 0, duration: 20 }, 60)
+          .to(
+            massDom,
+            isMobile
+              ? { ...sceneContrast(1, 1, 1), duration: 20 }
+              : { opacity: 1, y: 0, duration: 20 },
+            60,
+          )
           .to(accents.dom, { strokeDashoffset: 0, duration: 12 }, 64)
           .to(dayStrong.dom, { opacity: 1, duration: 10 }, 64)
           .to(markers.dom, { stroke: "var(--accent-primary)", duration: 3 }, 77)
           .to(mobileMarkers.dom, { fill: "var(--accent-primary)", duration: 3 }, 77)
           // 80–100 · piano eseguibile: i quieti risalgono, la chiusa si compie
-          .to(quiet, { opacity: 0.58, duration: 15 }, 82)
+          .to(quiet, { opacity: isMobile ? 0.6 : 0.58, duration: 15 }, 82)
           .to(closing, { opacity: 1, y: 0, duration: 16 }, 82);
+
+        if (isMobile) {
+          const shiftScene = (
+            content: HTMLElement[],
+            timelineGroup: SVGGElement[],
+            y: number,
+            duration: number,
+            position: number,
+          ) => {
+            timeline
+              .to(content, { y, duration }, position)
+              .to(timelineGroup, { y: () => mobileTimelineY(y), duration }, position);
+          };
+
+          shiftScene(
+            mobileContent.lun,
+            mobileTimeline.lun,
+            MOBILE_SCENE_SHIFT.settled,
+            20,
+            15,
+          );
+          shiftScene(
+            mobileContent.mar,
+            mobileTimeline.mar,
+            MOBILE_SCENE_SHIFT.settled,
+            25,
+            35,
+          );
+          shiftScene(
+            mobileContent.dom,
+            mobileTimeline.dom,
+            MOBILE_SCENE_SHIFT.preview,
+            22,
+            36,
+          );
+          shiftScene(
+            mobileContent.dom,
+            mobileTimeline.dom,
+            MOBILE_SCENE_SHIFT.settled,
+            20,
+            60,
+          );
+
+          timeline
+            .to(massLun, { ...sceneContrast(0.76, 0.54, 0.44), duration: 25 }, 35)
+            .to(massLun, { ...sceneContrast(0.62, 0.46, 0.36), duration: 20 }, 60)
+            .to(massMar, { ...sceneContrast(0.76, 0.54, 0.44), duration: 20 }, 60);
+        }
       });
     }, section);
 

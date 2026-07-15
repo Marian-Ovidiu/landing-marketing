@@ -34,6 +34,15 @@ async function moveTo(page: import("playwright/test").Page, progress: number) {
 async function visualState(page: import("playwright/test").Page) {
   return page.locator("#section-02-esempio-di-piano").evaluate((section) => {
     const style = (selector: string) => getComputedStyle(section.querySelector(selector)!);
+    const effectiveOpacity = (selector: string) => {
+      let element: Element | null = section.querySelector(selector);
+      let opacity = 1;
+      while (element && element !== section.parentElement) {
+        opacity *= Number.parseFloat(getComputedStyle(element).opacity);
+        element = element.parentElement;
+      }
+      return Number(opacity.toFixed(4));
+    };
     return {
       band: style("[data-band-base]").strokeDashoffset,
       accentLun: style("[data-accent-lun]").strokeDashoffset,
@@ -44,12 +53,85 @@ async function visualState(page: import("playwright/test").Page) {
       mobileMarkerLun: style(".segnale-s02-band-mobile [data-marker-lun]").fill,
       mobileMarkerMar: style(".segnale-s02-band-mobile [data-marker-mar]").fill,
       mobileMarkerDom: style(".segnale-s02-band-mobile [data-marker-dom]").fill,
-      massLun: style("[data-mass-lun]").opacity,
+      massLun: effectiveOpacity("[data-mass-lun] h3"),
       massLunTransform: style("[data-mass-lun]").transform,
-      massMar: style("[data-mass-mar]").opacity,
-      massDom: style("[data-mass-dom]").opacity,
+      massMar: effectiveOpacity("[data-mass-mar] h3"),
+      massDom: effectiveOpacity("[data-mass-dom] h3"),
+      statusLun: effectiveOpacity("[data-mass-lun] [data-operational-status]"),
+      statusMar: effectiveOpacity("[data-mass-mar] [data-operational-status]"),
+      statusDom: effectiveOpacity("[data-mass-dom] [data-operational-status]"),
+      metaLun: effectiveOpacity('[data-mass-lun] [data-meta-level="1"]'),
+      metaMar: effectiveOpacity('[data-mass-mar] [data-meta-level="1"]'),
+      metaDom: effectiveOpacity('[data-mass-dom] [data-meta-level="1"]'),
       quiet: style("[data-quiet]").opacity,
+      quietEffective: effectiveOpacity(".segnale-s02-quiet-mobile"),
+      quietTimeEffective: effectiveOpacity(".segnale-s02-quiet-time"),
       closing: style("[data-closing]").opacity,
+      baseLineOpacity: style(".segnale-s02-band-mobile [data-band-base]").opacity,
+      baseLineStroke: style(".segnale-s02-band-mobile [data-band-base]").stroke,
+    };
+  });
+}
+
+async function nodeGeometry(page: import("playwright/test").Page) {
+  return page.locator("#section-02-esempio-di-piano").evaluate((section) => {
+    const field = section.querySelector<HTMLElement>(".segnale-s02-field")!;
+    const fieldTop = field.getBoundingClientRect().top;
+    const relative = (value: number) => Number((value - fieldTop).toFixed(3));
+    const scene = (name: "lun" | "mar" | "dom") => {
+      const mass = section.querySelector<HTMLElement>(`[data-mass-${name}]`)!;
+      const label = mass.querySelector<HTMLElement>(".segnale-s02-label")!;
+      const status = mass.querySelector<HTMLElement>("[data-operational-status]")!;
+      const title = mass.querySelector<HTMLElement>("h3")!;
+      const band = section.querySelector<SVGSVGElement>(".segnale-s02-band")!;
+      const timelineGroup = section.querySelector<SVGGElement>(
+        `.segnale-s02-band-mobile [data-timeline-${name}]`,
+      )!;
+      const marker = section.querySelector<SVGEllipseElement>(
+        `.segnale-s02-band-mobile [data-marker-${name}]`,
+      )!;
+      const line = section.querySelector<SVGPathElement>(
+        `.segnale-s02-band-mobile [data-accent-${name}]`,
+      )!;
+      const labelRect = label.getBoundingClientRect();
+      const statusRect = status.getBoundingClientRect();
+      const markerRect = marker.getBoundingClientRect();
+      const lineRect = line.getBoundingClientRect();
+      const markerCenter = markerRect.top + markerRect.height / 2;
+      const lineCenter = lineRect.top + lineRect.height / 2;
+      const statusCenter = statusRect.top + statusRect.height / 2;
+      const timelineTranslateY = new DOMMatrixReadOnly(
+        getComputedStyle(timelineGroup).transform,
+      ).f;
+      const bandRect = band.getBoundingClientRect();
+      const svgScaleY = bandRect.height / band.viewBox.baseVal.height;
+      const markerCenterWithoutGroupShift = bandRect.top + marker.cy.baseVal.value * svgScaleY;
+      return {
+        labelTop: relative(labelRect.top),
+        markerCenter: relative(markerCenter),
+        labelToMarkerGap: Number((markerRect.top - labelRect.bottom).toFixed(3)),
+        markerLineDelta: Number((markerCenter - lineCenter).toFixed(3)),
+        markerStatusDelta: Number((markerCenter - statusCenter).toFixed(3)),
+        kickerTranslateY: Number(
+          new DOMMatrixReadOnly(getComputedStyle(label).transform).f.toFixed(3),
+        ),
+        massTranslateY: Number(
+          new DOMMatrixReadOnly(getComputedStyle(mass).transform).f.toFixed(3),
+        ),
+        contentTranslateY: Number(
+          new DOMMatrixReadOnly(getComputedStyle(title).transform).f.toFixed(3),
+        ),
+        timelineTranslateY: Number(timelineTranslateY.toFixed(3)),
+        timelineTranslateCssY: Number(
+          (markerCenter - markerCenterWithoutGroupShift).toFixed(3),
+        ),
+      };
+    };
+    return {
+      lun: scene("lun"),
+      mar: scene("mar"),
+      dom: scene("dom"),
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
     };
   });
 }
@@ -80,6 +162,7 @@ test("monta il rendering dedicato dopo S01 e conserva l'ordine DOM", async ({ pa
 });
 
 test("settimana aperta senza teal, poi i tre marker lo guadagnano in ordine", async ({ page }) => {
+  const isMobile = await page.evaluate(() => window.innerWidth < 768);
   await moveTo(page, 0);
   const open = await visualState(page);
   expect(parseFloat(open.band)).toBeGreaterThan(0.9);
@@ -89,13 +172,13 @@ test("settimana aperta senza teal, poi i tre marker lo guadagnano in ordine", as
   expect(open.mobileMarkerLun).not.toBe(TEAL);
   expect(open.mobileMarkerMar).not.toBe(TEAL);
   expect(open.mobileMarkerDom).not.toBe(TEAL);
-  expect(Number(open.massLun)).toBeLessThan(0.35);
+  expect(Number(open.massLun)).toBeCloseTo(isMobile ? 0.52 : 0.3, 2);
   expect(Number(open.closing)).toBeLessThan(0.15);
 
   await moveTo(page, 0.38);
   const preparazione = await visualState(page);
   expect(parseFloat(preparazione.band)).toBeLessThan(0.01);
-  expect(Number(preparazione.massLun)).toBeGreaterThan(0.99);
+  expect(Number(preparazione.massLun)).toBeGreaterThan(isMobile ? 0.85 : 0.99);
   expect(preparazione.markerLun).toBe(TEAL);
   expect(preparazione.mobileMarkerLun).toBe(TEAL);
   expect(preparazione.markerMar).not.toBe(TEAL);
@@ -104,11 +187,11 @@ test("settimana aperta senza teal, poi i tre marker lo guadagnano in ordine", as
 
   await moveTo(page, 0.62);
   const attivazione = await visualState(page);
-  expect(Number(attivazione.massMar)).toBeGreaterThan(0.99);
+  expect(Number(attivazione.massMar)).toBeGreaterThan(isMobile ? 0.9 : 0.99);
   expect(attivazione.markerMar).toBe(TEAL);
   expect(attivazione.mobileMarkerMar).toBe(TEAL);
   expect(attivazione.markerDom).not.toBe(TEAL);
-  expect(Number(attivazione.quiet)).toBeLessThan(0.45);
+  expect(Number(attivazione.quiet)).toBeLessThan(isMobile ? 0.52 : 0.45);
 
   await moveTo(page, 1);
   const finale = await visualState(page);
@@ -124,6 +207,7 @@ test("reverse e refresh a metà sono deterministici", async ({ page }) => {
   for (const [from, to] of [
     [0.2, 0.55],
     [0.45, 0.85],
+    [0.1, 0.9],
   ] as const) {
     await moveTo(page, from);
     const before = await visualState(page);
@@ -136,7 +220,8 @@ test("reverse e refresh a metà sono deterministici", async ({ page }) => {
   await moveTo(page, 0);
   const azzerato = await visualState(page);
   expect(azzerato.markerLun).not.toBe(TEAL);
-  expect(Number(azzerato.massLun)).toBeLessThan(0.35);
+  const isMobile = await page.evaluate(() => window.innerWidth < 768);
+  expect(Number(azzerato.massLun)).toBeCloseTo(isMobile ? 0.52 : 0.3, 2);
 
   await moveTo(page, 0.5);
   const beforeRefresh = await visualState(page);
@@ -237,7 +322,9 @@ test("S02 mobile ha tre scene editoriali leggibili nel visual viewport", async (
       const process = one(".segnale-s02-disclaimer");
       const closing = one(".segnale-s02-closing");
       const quietCopy = one(".segnale-s02-quiet-mobile");
-      const mainMetaOpacity = parseFloat(getComputedStyle(metadata[0]).opacity);
+      const mainMetaOpacity = Math.max(
+        ...metadata.map((item) => parseFloat(getComputedStyle(item).opacity)),
+      );
       const quietOpacity = parseFloat(getComputedStyle(quiet[0]).opacity) * parseFloat(getComputedStyle(quietCopy).opacity);
 
       return {
@@ -366,6 +453,234 @@ test("linea mobile comunica avanzamento con nodi pieni, senza cambiare il montag
   await context.close();
 });
 
+test("hotfix sincronizza timeline e contenuto mobile sulla label operativa", async ({ browser, baseURL }) => {
+  test.setTimeout(120_000);
+  for (const viewport of [
+    { width: 360, height: 800 },
+    { width: 375, height: 812 },
+    { width: 390, height: 844 },
+    { width: 412, height: 915 },
+    { width: 390, height: 720, screenHeight: 844 },
+  ]) {
+    const context = await browser.newContext({
+      viewport: { width: viewport.width, height: viewport.height },
+      screen: viewport.screenHeight
+        ? { width: viewport.width, height: viewport.screenHeight }
+        : undefined,
+      isMobile: Boolean(viewport.screenHeight),
+    });
+    const localPage = await context.newPage();
+    await localPage.goto(`${baseURL}/concept/segnale`, { waitUntil: "networkidle" });
+
+    await moveTo(localPage, 0);
+    const initial = await nodeGeometry(localPage);
+    const baseline = {
+      lun: initial.lun.markerStatusDelta,
+      mar: initial.mar.markerStatusDelta,
+      dom: initial.dom.markerStatusDelta,
+    };
+
+    for (const progress of [0, 0.05, 0.1]) {
+      await moveTo(localPage, progress);
+      const state = await nodeGeometry(localPage);
+      for (const [name, scene] of [
+        ["lun", state.lun],
+        ["mar", state.mar],
+        ["dom", state.dom],
+      ] as const) {
+        expect(scene.labelToMarkerGap).toBeGreaterThanOrEqual(13);
+        expect(Math.abs(scene.markerLineDelta)).toBeLessThanOrEqual(0.01);
+        // 1.75 px assorbe la baseline ottica preesistente del nodo MAR
+        // (-1.608 px), mantenendola stabile a un quinto dell'altezza del nodo.
+        expect(Math.abs(scene.markerStatusDelta)).toBeLessThanOrEqual(1.75);
+        expect(Math.abs(scene.markerStatusDelta - baseline[name])).toBeLessThanOrEqual(0.02);
+        expect(scene.kickerTranslateY).toBe(0);
+        expect(scene.massTranslateY).toBe(0);
+        expect(scene.contentTranslateY).toBeCloseTo(10, 1);
+        expect(scene.timelineTranslateCssY).toBeCloseTo(10, 1);
+        expect(
+          Math.abs(scene.timelineTranslateCssY - scene.contentTranslateY),
+        ).toBeLessThanOrEqual(0.02);
+      }
+      expect(state.overflow).toBe(0);
+    }
+
+    for (const [progress, name] of [
+      [0.25, "lun"],
+      [0.475, "mar"],
+      [0.7, "dom"],
+      [0.35, "lun"],
+      [0.6, "mar"],
+      [0.8, "dom"],
+    ] as const) {
+      await moveTo(localPage, progress);
+      const state = await nodeGeometry(localPage);
+      const active = state[name];
+      expect(active.labelToMarkerGap).toBeGreaterThanOrEqual(3.5);
+      expect(Math.abs(active.markerLineDelta)).toBeLessThanOrEqual(0.01);
+      expect(Math.abs(active.markerStatusDelta - baseline[name])).toBeLessThanOrEqual(0.02);
+      expect(active.kickerTranslateY).toBe(0);
+      expect(active.massTranslateY).toBe(0);
+      expect(
+        Math.abs(active.timelineTranslateCssY - active.contentTranslateY),
+      ).toBeLessThanOrEqual(0.02);
+    }
+    await context.close();
+  }
+
+  const cssContext = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    javaScriptEnabled: false,
+  });
+  const cssPage = await cssContext.newPage();
+  await cssPage.goto(`${baseURL}/concept/segnale`, { waitUntil: "networkidle" });
+  const cssState = await nodeGeometry(cssPage);
+  for (const scene of [cssState.lun, cssState.mar, cssState.dom]) {
+    expect(scene.labelToMarkerGap).toBeGreaterThanOrEqual(3.5);
+    expect(Math.abs(scene.markerLineDelta)).toBeLessThanOrEqual(0.01);
+    expect(Math.abs(scene.markerStatusDelta)).toBeLessThanOrEqual(1.75);
+    expect(scene.kickerTranslateY).toBe(0);
+    expect(scene.massTranslateY).toBe(0);
+    expect(scene.contentTranslateY).toBe(0);
+    expect(Math.abs(scene.timelineTranslateCssY)).toBeLessThanOrEqual(0.001);
+  }
+  await cssContext.close();
+});
+
+test("hotfix resta deterministico in reverse e refresh prima e durante S02", async ({ page }) => {
+  await moveTo(page, 0.05);
+  const beforeReverse = await nodeGeometry(page);
+  await moveTo(page, 0.82);
+  await moveTo(page, 0.05);
+  expect(await nodeGeometry(page)).toEqual(beforeReverse);
+
+  await moveTo(page, 0);
+  const beforeStartRefresh = await nodeGeometry(page);
+  await page.reload({ waitUntil: "networkidle" });
+  await moveTo(page, 0);
+  expect(await nodeGeometry(page)).toEqual(beforeStartRefresh);
+
+  await moveTo(page, 0.5);
+  const beforeMiddleRefresh = await nodeGeometry(page);
+  await page.reload({ waitUntil: "networkidle" });
+  await moveTo(page, 0.5);
+  expect(await nodeGeometry(page)).toEqual(beforeMiddleRefresh);
+});
+
+test("mobile separa stato, titolo e dettagli senza fade globale", async ({ browser, baseURL }) => {
+  for (const viewport of [
+    { width: 360, height: 800 },
+    { width: 375, height: 812 },
+    { width: 390, height: 844 },
+    { width: 412, height: 915 },
+    { width: 390, height: 720 },
+  ]) {
+    const context = await browser.newContext({ viewport });
+    const localPage = await context.newPage();
+    await localPage.goto(`${baseURL}/concept/segnale`, { waitUntil: "networkidle" });
+
+    await moveTo(localPage, 0);
+    const initial = await visualState(localPage);
+    expect(initial.statusLun).toBeGreaterThanOrEqual(0.77);
+    expect(initial.massLun).toBeGreaterThanOrEqual(0.51);
+    expect(initial.metaLun).toBeGreaterThanOrEqual(0.38);
+    expect(initial.statusMar).toBeGreaterThanOrEqual(0.61);
+    expect(initial.massMar).toBeGreaterThanOrEqual(0.35);
+    expect(initial.metaMar).toBeGreaterThanOrEqual(0.25);
+    expect(initial.quietEffective).toBeGreaterThanOrEqual(0.45);
+    expect(initial.quietTimeEffective).toBeGreaterThanOrEqual(0.32);
+    expect(initial.baseLineStroke).toBe("rgb(90, 100, 105)");
+    expect(Number(initial.baseLineOpacity)).toBeCloseTo(0.52, 2);
+
+    await moveTo(localPage, 0.47);
+    const firstHandoff = await visualState(localPage);
+    expect(firstHandoff.statusLun).toBeGreaterThanOrEqual(0.88);
+    expect(firstHandoff.massLun).toBeGreaterThanOrEqual(0.78);
+    expect(firstHandoff.statusMar).toBeGreaterThanOrEqual(0.77);
+    expect(firstHandoff.massMar).toBeGreaterThanOrEqual(0.63);
+    expect(firstHandoff.statusDom).toBeGreaterThanOrEqual(0.63);
+    expect(firstHandoff.massDom).toBeGreaterThanOrEqual(0.36);
+    expect(firstHandoff.metaDom).toBeGreaterThanOrEqual(0.26);
+
+    await moveTo(localPage, 0.7);
+    const secondHandoff = await visualState(localPage);
+    expect(secondHandoff.massLun).toBeGreaterThanOrEqual(0.5);
+    expect(secondHandoff.statusMar).toBeGreaterThanOrEqual(0.89);
+    expect(secondHandoff.massMar).toBeGreaterThanOrEqual(0.79);
+    expect(secondHandoff.statusDom).toBeGreaterThanOrEqual(0.79);
+    expect(secondHandoff.massDom).toBeGreaterThanOrEqual(0.63);
+    expect(secondHandoff.metaDom).toBeGreaterThanOrEqual(0.53);
+    expect(secondHandoff.quietEffective).toBeGreaterThanOrEqual(0.36);
+    expect(secondHandoff.quietTimeEffective).toBeGreaterThanOrEqual(0.26);
+
+    await moveTo(localPage, 1);
+    const final = await visualState(localPage);
+    expect(final.statusLun).toBeCloseTo(0.62, 2);
+    expect(final.massLun).toBeCloseTo(0.46, 2);
+    expect(final.metaLun).toBeGreaterThanOrEqual(0.33);
+    expect(final.statusMar).toBeCloseTo(0.76, 2);
+    expect(final.massMar).toBeCloseTo(0.54, 2);
+    expect(final.metaMar).toBeGreaterThanOrEqual(0.4);
+    expect(final.statusDom).toBeGreaterThanOrEqual(0.99);
+    expect(final.massDom).toBeGreaterThanOrEqual(0.99);
+    expect(final.metaDom).toBeGreaterThanOrEqual(0.91);
+
+    const geometry = await localPage.evaluate(() => ({
+      minFont: Math.min(
+        ...Array.from(
+          document.querySelectorAll<HTMLElement>(
+            "#section-01-come-funziona *, #section-02-esempio-di-piano *",
+          ),
+        )
+          .filter((element) => {
+            const rect = element.getBoundingClientRect();
+            return Boolean(element.textContent?.trim()) && rect.width > 0 && rect.height > 0;
+          })
+          .map((element) => Number.parseFloat(getComputedStyle(element).fontSize)),
+      ),
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    }));
+    expect(geometry.minFont).toBeGreaterThanOrEqual(10);
+    expect(geometry.overflow).toBe(0);
+    await context.close();
+  }
+});
+
+test("Sprint 7 lascia invariato il contrasto S02 a 768px e desktop", async ({ browser, baseURL }) => {
+  for (const viewport of [
+    { width: 768, height: 900 },
+    { width: 1440, height: 1000 },
+  ]) {
+    const context = await browser.newContext({ viewport });
+    const localPage = await context.newPage();
+    await localPage.goto(`${baseURL}/concept/segnale`, { waitUntil: "networkidle" });
+    await moveTo(localPage, 0);
+    const section = localPage.locator("#section-02-esempio-di-piano");
+    const state = await section.evaluate((node) => {
+      const mass = node.querySelector<HTMLElement>("[data-mass-lun]")!;
+      const meta = node.querySelector<HTMLElement>(".segnale-s02-meta")!;
+      const line = node.querySelector<SVGPathElement>("[data-band-base]")!;
+      return {
+        mass: getComputedStyle(mass).opacity,
+        massTranslateY: new DOMMatrixReadOnly(getComputedStyle(mass).transform).f,
+        titleTranslateY: new DOMMatrixReadOnly(
+          getComputedStyle(mass.querySelector("h3")!).transform,
+        ).f,
+        meta: getComputedStyle(meta).opacity,
+        anchorVar: getComputedStyle(mass).getPropertyValue("--s02-anchor-opacity"),
+        lineStroke: getComputedStyle(line).stroke,
+      };
+    });
+    expect(Number(state.mass)).toBeCloseTo(0.3, 2);
+    expect(state.massTranslateY).toBeCloseTo(10, 2);
+    expect(state.titleTranslateY).toBe(0);
+    expect(Number(state.meta)).toBeCloseTo(1, 2);
+    expect(state.anchorVar).toBe("");
+    expect(state.lineStroke).toBe("rgb(207, 214, 217)");
+    await context.close();
+  }
+});
+
 test("browser chrome ridotto lascia leggibile la chiusura della sezione", async ({ browser, baseURL }) => {
   const context = await browser.newContext({
     viewport: { width: 390, height: 720 },
@@ -450,5 +765,12 @@ test("reduced motion mostra il piano completo in flusso normale", async ({ brows
   await expect(section.locator("[data-operational-status]")).toHaveCount(3);
   await expect(section.locator("[data-outcome]")).toHaveCount(3);
   await expect(section.getByText("Cinque ore e venti", { exact: false })).toBeVisible();
+  const reducedGeometry = await nodeGeometry(localPage);
+  for (const scene of [reducedGeometry.lun, reducedGeometry.mar, reducedGeometry.dom]) {
+    expect(scene.labelToMarkerGap).toBeGreaterThanOrEqual(3.5);
+    expect(Math.abs(scene.markerLineDelta)).toBeLessThanOrEqual(0.01);
+    expect(scene.massTranslateY).toBe(0);
+    expect(scene.contentTranslateY).toBe(0);
+  }
   await context.close();
 });

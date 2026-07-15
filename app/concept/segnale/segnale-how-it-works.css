@@ -448,6 +448,20 @@
   }
 }
 
+/* Sprint 7: sul solo mobile il tracciato usa il token secondario con una
+   gerarchia esplicita. Il teal attivo resta governato dalla timeline. */
+@media (max-width: 767px) {
+  .segnale-trace-mobile [data-trace-first],
+  .segnale-trace-mobile [data-trace-center-base] {
+    opacity: 0.52;
+    stroke: var(--text-secondary);
+  }
+
+  .segnale-trace-mobile .segnale-trace-marker {
+    opacity: 0.82;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .segnale-how-it-works {
     height: auto;

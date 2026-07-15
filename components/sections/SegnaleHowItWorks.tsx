@@ -67,6 +67,7 @@ export function SegnaleHowItWorks() {
     const ctx = gsap.context(() => {
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const isMobile = window.matchMedia("(max-width: 767px)").matches;
         const first = gsap.utils.toArray<SVGPathElement>(section.querySelectorAll("[data-trace-first]"));
         const centerBase = gsap.utils.toArray<SVGPathElement>(
           section.querySelectorAll("[data-trace-center-base]"),
@@ -95,14 +96,16 @@ export function SegnaleHowItWorks() {
         gsap.set(centerBase, { strokeDasharray: 1, strokeDashoffset: 1 });
         gsap.set(center, { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 });
         gsap.set(finalTrace, { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0.25 });
-        gsap.set(usefulMarkers, { stroke: "var(--s01-line)" });
+        gsap.set(usefulMarkers, {
+          stroke: isMobile ? "var(--text-secondary)" : "var(--s01-line)",
+        });
         gsap.set(decisionMarker, { stroke: "var(--s01-line)", opacity: 0.35 });
         gsap.set(noise, { opacity: 1 });
-        gsap.set(evidence, { opacity: 0.62, y: 10 });
+        gsap.set(evidence, { opacity: isMobile ? 0.68 : 0.62, y: 10 });
         gsap.set(reading, { opacity: 0.76 });
-        gsap.set(decision, { opacity: 0.28 });
-        gsap.set(detail, { opacity: 0.45 });
-        gsap.set(secondary, { opacity: 0.2 });
+        gsap.set(decision, { opacity: isMobile ? 0.34 : 0.28 });
+        gsap.set(detail, { opacity: isMobile ? 0.92 : 0.45 });
+        gsap.set(secondary, { opacity: isMobile ? 0.78 : 0.2 });
         gsap.set(decisionRule, { scaleX: 0, transformOrigin: "left center" });
 
         const timeline = gsap.timeline({
@@ -119,7 +122,7 @@ export function SegnaleHowItWorks() {
         timeline
           .to(first, { strokeDashoffset: 0.25, duration: 20 }, 0)
           .to(first, { strokeDashoffset: 0, duration: 20 }, 20)
-          .to(noise, { opacity: 0.42, duration: 25 }, 20)
+          .to(noise, { opacity: isMobile ? 0.5 : 0.42, duration: 25 }, 20)
           .to(reading, { opacity: 1, duration: 25 }, 20)
           .to(centerBase, { strokeDashoffset: 0, duration: 20 }, 25);
 
@@ -128,18 +131,18 @@ export function SegnaleHowItWorks() {
         });
 
         timeline
-          .to(center, { opacity: 0.9, strokeDashoffset: 0, duration: 6 }, 44)
+          .to(center, { opacity: isMobile ? 0.95 : 0.9, strokeDashoffset: 0, duration: 6 }, 44)
           .to(usefulMarkers, { stroke: "var(--accent-primary)", duration: 5 }, 45)
-          .to(decision, { opacity: 0.56, duration: 12 }, 38)
-          .to(detail, { opacity: 1, duration: 12 }, 38)
-          .to(secondary, { opacity: 0.45, duration: 12 }, 38)
+          .to(decision, { opacity: isMobile ? 0.58 : 0.56, duration: 12 }, 38)
+          .to(detail, { opacity: isMobile ? 0.92 : 1, duration: 12 }, 38)
+          .to(secondary, { opacity: isMobile ? 0.78 : 0.45, duration: 12 }, 38)
           .to(finalTrace, { opacity: 0.7, strokeDashoffset: 0, duration: 15 }, 40)
           .to(decisionMarker, { opacity: 1, stroke: "var(--accent-primary)", duration: 10 }, 45)
           .to(decision, { opacity: 1, duration: 22 }, 50)
-          .to(secondary, { opacity: 0.72, duration: 20 }, 58)
-          .to(reading, { opacity: 0.78, duration: 22 }, 60)
-          .to(noise, { opacity: 0.52, duration: 22 }, 70)
-          .to(center, { opacity: 0.5, duration: 20 }, 70)
+          .to(secondary, { opacity: isMobile ? 0.78 : 0.72, duration: 20 }, 58)
+          .to(reading, { opacity: isMobile ? 0.56 : 0.78, duration: 22 }, 60)
+          .to(noise, { opacity: isMobile ? 0.55 : 0.52, duration: 22 }, 70)
+          .to(center, { opacity: isMobile ? 0.58 : 0.5, duration: 20 }, 70)
           .to(decisionRule, { scaleX: 1, duration: 28 }, 72);
       });
     }, section);
